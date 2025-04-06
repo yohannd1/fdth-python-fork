@@ -1,5 +1,5 @@
 import pandas as pd
-from fdt_cat_data_frame import fdt_cat_data_frame  # Ensure the function and class are in the same directory
+from fdth.fdt_cat_data_frame import fdt_cat_data_frame  # Ensure the function and class are in the same directory
 
 
 # Test 1: Sem agrupamento
