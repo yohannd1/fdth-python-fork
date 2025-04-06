@@ -1,23 +1,27 @@
 import numpy as np
+from typing import Any
 
-def mean_fdt(x):
+
+def mean_fdt(x: Any) -> float:
     # Definir intervalos de classe com base nos valores 'start', 'end' e 'h'
-    breaks = np.arange(x['breaks']['start'], x['breaks']['end'] + x['breaks']['h'], x['breaks']['h'])
-    
+    breaks = np.arange(
+        x["breaks"]["start"], x["breaks"]["end"] + x["breaks"]["h"], x["breaks"]["h"]
+    )
+
     # Calcular pontos médios dos intervalos de classe
     mids = 0.5 * (breaks[:-1] + breaks[1:])
-    
+
     # Frequências das classes
-    y = x['table'][:, 1]
-    
+    y = x["table"][:, 1]
+
     # Calcular a média ponderada dos pontos médios
     res = np.sum(y * mids) / np.sum(y)
-    
+
     # Retornar a média
     return res
 
 
-'''# Exemplo de entrada de teste para mean_fdt
+"""# Exemplo de entrada de teste para mean_fdt
 x_test = {
     'breaks': {
         'start': 0,
@@ -35,4 +39,4 @@ x_test = {
 # Executar a função e imprimir o resultado
 resultado = mean_fdt(x_test)
 print("Média:", resultado)
-'''
+"""

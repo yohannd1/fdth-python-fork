@@ -1,15 +1,17 @@
 import pandas as pd
-from make_fdt_cat_simple import make_fdt_cat_simple
+from fdth.make_fdt_cat_simple import make_fdt_cat_simple
+
 
 class FDTResult:
     """
-    Class to encapsulate the results of frequency distribution tables (FDTs) 
+    Class to encapsulate the results of frequency distribution tables (FDTs)
     and provide formatted output.
 
     Attributes:
         results (dict): A dictionary where keys are column names and values are
                         DataFrames containing the FDT for the respective columns.
     """
+
     def __init__(self, results):
         """
         Initialize the FDTResult class with the computed results.
@@ -30,9 +32,9 @@ class FDTResult:
         for key, value in self.results.items():
             output.append(f"--- {key} ---")
             output.append("Table:")
-            table_with_index = value.to_string(index=True)  
+            table_with_index = value.to_string(index=True)
             output.append(table_with_index)
-            output.append("")  
+            output.append("")
         return "\n".join(output)
 
 
@@ -43,7 +45,7 @@ def make_fdt_cat_multiple(df, sort=False, decreasing=False):
     Parameters:
         df (pd.DataFrame): Input DataFrame.
         sort (bool): If True, sorts the tables by frequency. Default is False.
-        decreasing (bool): If sort is True, sorts in descending order if True, 
+        decreasing (bool): If sort is True, sorts in descending order if True,
                            otherwise in ascending order. Default is False.
 
     Returns:
@@ -57,7 +59,7 @@ def make_fdt_cat_multiple(df, sort=False, decreasing=False):
 
     results = {}
     # Select only categorical columns
-    categorical_columns = df.select_dtypes(include=['category', 'object']).columns
+    categorical_columns = df.select_dtypes(include=["category", "object"]).columns
 
     for col in categorical_columns:
         column_data = df[col]

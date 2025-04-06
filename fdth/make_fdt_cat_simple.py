@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def make_fdt_cat_simple(x, sort=False, decreasing=False):
     """
     Creates a frequency distribution table (FDT) for categorical data.
@@ -23,12 +24,12 @@ def make_fdt_cat_simple(x, sort=False, decreasing=False):
 
     # Convert to pandas Series if it's a list
     x = pd.Series(x)
-    
-    if not (x.dtypes == 'object' or x.dtypes.name == 'category'):
+
+    if not (x.dtypes == "object" or x.dtypes.name == "category"):
         raise ValueError("Values must be strings or categorical.")
 
     # Convert to categorical type
-    x = x.astype('category')
+    x = x.astype("category")
 
     # Calculate absolute frequency
     f = x.value_counts(sort=False)
@@ -38,19 +39,21 @@ def make_fdt_cat_simple(x, sort=False, decreasing=False):
         f = f.sort_values(ascending=not decreasing)
 
     # Calculate relative frequencies and cumulative frequencies
-    rf = f / f.sum()             # Relative frequency
-    rfp = rf * 100               # Relative frequency as a percentage
-    cf = f.cumsum()              # Cumulative absolute frequency
-    cfp = rfp.cumsum()           # Cumulative relative frequency as a percentage
+    rf = f / f.sum()  # Relative frequency
+    rfp = rf * 100  # Relative frequency as a percentage
+    cf = f.cumsum()  # Cumulative absolute frequency
+    cfp = rfp.cumsum()  # Cumulative relative frequency as a percentage
 
     # Create the final table
-    res = pd.DataFrame({
-        'Category': f.index,
-        'f': f.values,
-        'rf': rf.values,
-        'rf(%)': rfp.values,
-        'cf': cf.values,
-        'cf(%)': cfp.values
-    })
+    res = pd.DataFrame(
+        {
+            "Category": f.index,
+            "f": f.values,
+            "rf": rf.values,
+            "rf(%)": rfp.values,
+            "cf": cf.values,
+            "cf(%)": cfp.values,
+        }
+    )
 
     return res

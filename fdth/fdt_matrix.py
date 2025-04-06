@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from make_fdt_multiple import make_fdt_multiple
+from fdth.make_fdt_multiple import make_fdt_multiple
 
 
 class FDTMatrixResult:
@@ -8,6 +8,7 @@ class FDTMatrixResult:
     Class to encapsulate the results of frequency distribution tables for matrices
     and provide formatted output.
     """
+
     def __init__(self, results):
         self.results = results
 
@@ -16,7 +17,9 @@ class FDTMatrixResult:
         for key, value in self.results.items():
             output.append(f"--- {key} ---")
             output.append("Table:")
-            output.append(value["table"].to_string(index=False))  # Format table as string
+            output.append(
+                value["table"].to_string(index=False)
+            )  # Format table as string
             output.append("\nBreaks:")
             for break_key, break_value in value["breaks"].items():
                 output.append(f"  {break_key}: {break_value}")
@@ -40,7 +43,7 @@ def fdt_matrix(x, k=None, breaks="Sturges", right=False, na_rm=False):
     """
     if not isinstance(x, np.ndarray):
         raise ValueError("Input x must be a numpy.ndarray.")
-    
+
     results = {}
 
     # Iterate through each column of the matrix
@@ -48,10 +51,15 @@ def fdt_matrix(x, k=None, breaks="Sturges", right=False, na_rm=False):
         col_data = x[:, i]
 
         # Call make_fdt_multiple for each column
-        fdt_result = make_fdt_multiple(col_data, k=k, breaks=breaks, right=right, na_rm=na_rm)
-        
+        fdt_result = make_fdt_multiple(
+            col_data, k=k, breaks=breaks, right=right, na_rm=na_rm
+        )
+
         # Store results in a dictionary
         col_name = f"Column:{i+1}"
-        results[col_name] = {"table": fdt_result["table"], "breaks": fdt_result["breaks"]}
+        results[col_name] = {
+            "table": fdt_result["table"],
+            "breaks": fdt_result["breaks"],
+        }
 
     return FDTMatrixResult(results)

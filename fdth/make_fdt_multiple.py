@@ -1,5 +1,6 @@
 import numpy as np
-from make_fdt_simple import make_fdt_simple
+from fdth.make_fdt_simple import make_fdt_simple
+
 
 def make_fdt_multiple(x, k=None, breaks="Sturges", right=False, na_rm=False):
     """
@@ -17,14 +18,14 @@ def make_fdt_multiple(x, k=None, breaks="Sturges", right=False, na_rm=False):
     """
     if not na_rm and np.isnan(x).any():
         raise ValueError("The data has <NA> values and na_rm=False by default.")
-    
+
     # Remove NA values if na_rm is True
     x = np.array(x)
     if na_rm:
         x = x[~np.isnan(x)]
-    
+
     def nclass_scott(data):
-        h = 3.5 * np.std(data) * len(data) ** (-1/3)
+        h = 3.5 * np.std(data) * len(data) ** (-1 / 3)
         if h > 0:
             return max(1, int(np.ceil((data.max() - data.min()) / h)))
         return 1
@@ -36,15 +37,17 @@ def make_fdt_multiple(x, k=None, breaks="Sturges", right=False, na_rm=False):
             alpha = 0.25
             min_alpha = 1 / 512
             while h == 0 and alpha >= min_alpha:
-                h = (np.percentile(sorted_data, 100 - alpha * 100) - 
-                     np.percentile(sorted_data, alpha * 100)) / (1 - 2 * alpha)
+                h = (
+                    np.percentile(sorted_data, 100 - alpha * 100)
+                    - np.percentile(sorted_data, alpha * 100)
+                ) / (1 - 2 * alpha)
                 alpha /= 2
         if h == 0:
             h = 3.5 * np.std(data)
         if h > 0:
-            return int(np.ceil((data.max() - data.min()) / h * len(data) ** (1/3)))
+            return int(np.ceil((data.max() - data.min()) / h * len(data) ** (1 / 3)))
         return 1
-    
+
     # Determine k if not provided
     if k is None:
         if breaks == "Sturges":
@@ -64,14 +67,7 @@ def make_fdt_multiple(x, k=None, breaks="Sturges", right=False, na_rm=False):
 
     # Call the simple FDT function
     fdt_table = make_fdt_simple(x, start, end, h, right)
-    
-    breaks_info = {
-        "start": start,
-        "end": end,
-        "h": h,
-        "right": int(right)
-    }
+
+    breaks_info = {"start": start, "end": end, "h": h, "right": int(right)}
 
     return {"table": fdt_table, "breaks": breaks_info}
-
-

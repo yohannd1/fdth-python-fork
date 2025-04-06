@@ -1,23 +1,27 @@
 import pandas as pd
-from make_fdt_cat_multiple import make_fdt_cat_multiple
+from fdth.make_fdt_cat_multiple import make_fdt_cat_multiple
+from typing import Optional
 
 
 class FDTResultMultiple:
     """
-    Class to encapsulate the results of frequency distribution tables (FDTs) 
+    Class to encapsulate the results of frequency distribution tables (FDTs)
     for multiple columns and provide formatted output.
     """
-    def __init__(self, results):
+
+    def __init__(self, results: dict):
         """
         Initialize the FDTResultMultiple class with the computed results.
 
         Parameters:
-            results (dict): A dictionary where keys are column or group-column names 
+            results (dict): A dictionary where keys are column or group-column names
                             and values are DataFrames containing the FDT for each case.
+
+        :param results: foo
         """
         self.results = results
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Provide a formatted string representation of the FDT results.
 
@@ -33,23 +37,28 @@ class FDTResultMultiple:
         return "\n".join(output)
 
 
-def fdt_cat_data_frame(df, by=None, sort=True, decreasing=True):
+def fdt_cat_data_frame(
+    df: pd.DataFrame,
+    by: Optional[str] = None,
+    sort: bool = True,
+    decreasing: bool = True,
+) -> FDTResultMultiple:
     """
-    Generate frequency distribution tables (FDTs) for categorical columns in a DataFrame, 
+    Generate frequency distribution tables (FDTs) for categorical columns in a DataFrame,
     optionally grouped by a specified column.
 
     Parameters:
         df (pd.DataFrame): Input DataFrame.
         by (str, optional): Column name to group the data by. Default is None.
         sort (bool): If True, sort the FDT by frequency. Default is True.
-        decreasing (bool): If sort is True, sorts in descending order if True, 
+        decreasing (bool): If sort is True, sorts in descending order if True,
                            otherwise in ascending order. Default is True.
 
     Returns:
         FDTResultMultiple: An object containing the FDTs for all relevant columns.
 
     Raises:
-        ValueError: If the input is not a DataFrame, the grouping column is not present, 
+        ValueError: If the input is not a DataFrame, the grouping column is not present,
                     or the grouping column is not categorical.
     """
     if not isinstance(df, pd.DataFrame):
@@ -59,7 +68,7 @@ def fdt_cat_data_frame(df, by=None, sort=True, decreasing=True):
 
     if by is None:
         # If no grouping column is specified
-        categorical_columns = df.select_dtypes(include=['category', 'object']).columns
+        categorical_columns = df.select_dtypes(include=["category", "object"]).columns
         for col in categorical_columns:
             fdt = make_fdt_cat_multiple(df[[col]], sort=sort, decreasing=decreasing)
             results[col] = fdt.results[col]
@@ -67,16 +76,22 @@ def fdt_cat_data_frame(df, by=None, sort=True, decreasing=True):
         # If a grouping column is specified
         if by not in df.columns:
             raise ValueError(f"The column '{by}' is not present in the DataFrame.")
-        if not pd.api.types.is_categorical_dtype(df[by]) and not pd.api.types.is_object_dtype(df[by]):
+        if not pd.api.types.is_categorical_dtype(
+            df[by]
+        ) and not pd.api.types.is_object_dtype(df[by]):
             raise ValueError(f"The column '{by}' must be categorical.")
 
         # Avoid FutureWarning for groupby
         groups = df.groupby(by, observed=False)
         for group_name, group_data in groups:
             group_df = group_data.drop(columns=by)
-            categorical_columns = group_df.select_dtypes(include=['category', 'object']).columns
+            categorical_columns = group_df.select_dtypes(
+                include=["category", "object"]
+            ).columns
             for col in categorical_columns:
-                fdt = make_fdt_cat_multiple(group_df[[col]], sort=sort, decreasing=decreasing)
+                fdt = make_fdt_cat_multiple(
+                    group_df[[col]], sort=sort, decreasing=decreasing
+                )
                 results[f"{group_name}.{col}"] = fdt.results[col]
 
     return FDTResultMultiple(results)

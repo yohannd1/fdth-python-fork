@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
-from make_fdt_multiple import make_fdt_multiple
+from fdth.make_fdt_multiple import make_fdt_multiple
 
 
 class FDTResult:
     """
     Class to encapsulate the results of frequency distribution tables and provide formatted output.
     """
+
     def __init__(self, results):
         self.results = results
 
@@ -15,7 +16,9 @@ class FDTResult:
         for key, value in self.results.items():
             output.append(f"--- {key} ---")
             output.append("Table:")
-            output.append(value["table"].to_string(index=False))  # Convert the table to a readable string
+            output.append(
+                value["table"].to_string(index=False)
+            )  # Convert the table to a readable string
             output.append("\nBreaks:")
             for break_key, break_value in value["breaks"].items():
                 output.append(f"  {break_key}: {break_value}")
@@ -47,20 +50,34 @@ def fdt_data_frame(x, k=None, by=None, breaks="Sturges", right=False, na_rm=Fals
         # Process all numeric columns
         for column in x.select_dtypes(include=[np.number]).columns:
             column_data = x[column].dropna() if na_rm else x[column]
-            fdt_result = make_fdt_multiple(column_data, k=k, breaks=breaks, right=right, na_rm=na_rm)
-            results[column] = {"table": fdt_result["table"], "breaks": fdt_result["breaks"]}
+            fdt_result = make_fdt_multiple(
+                column_data, k=k, breaks=breaks, right=right, na_rm=na_rm
+            )
+            results[column] = {
+                "table": fdt_result["table"],
+                "breaks": fdt_result["breaks"],
+            }
     else:
         # Group by the specified column and process numeric columns in each group
         if by not in x.columns:
             raise ValueError(f"Column '{by}' not found in the DataFrame.")
-        if not pd.api.types.is_categorical_dtype(x[by]) and not pd.api.types.is_object_dtype(x[by]):
+        if not pd.api.types.is_categorical_dtype(
+            x[by]
+        ) and not pd.api.types.is_object_dtype(x[by]):
             raise ValueError(f"Column '{by}' must be categorical or of type object.")
 
         grouped = x.groupby(by)
         for group_name, group_data in grouped:
             for column in group_data.select_dtypes(include=[np.number]).columns:
-                column_data = group_data[column].dropna() if na_rm else group_data[column]
-                fdt_result = make_fdt_multiple(column_data, k=k, breaks=breaks, right=right, na_rm=na_rm)
-                results[f"{group_name}.{column}"] = {"table": fdt_result["table"], "breaks": fdt_result["breaks"]}
+                column_data = (
+                    group_data[column].dropna() if na_rm else group_data[column]
+                )
+                fdt_result = make_fdt_multiple(
+                    column_data, k=k, breaks=breaks, right=right, na_rm=na_rm
+                )
+                results[f"{group_name}.{column}"] = {
+                    "table": fdt_result["table"],
+                    "breaks": fdt_result["breaks"],
+                }
 
     return FDTResult(results)

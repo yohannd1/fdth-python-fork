@@ -1,16 +1,21 @@
+import numpy as np
 import pandas as pd
-from make_fdt_cat_simple import make_fdt_cat_simple  # Supondo que essa função já esteja implementada
+from fdth.make_fdt_cat_simple import (
+    make_fdt_cat_simple,
+)  # Supondo que essa função já esteja implementada
+
 
 class FDTMatrixResult:
     """
-    Class to encapsulate the results of frequency distribution tables (FDTs) 
+    Class to encapsulate the results of frequency distribution tables (FDTs)
     for each column in a matrix or DataFrame and provide formatted output.
 
     Attributes:
         results (dict): A dictionary where keys are column names and values are
                         DataFrames containing the FDT for the respective columns.
     """
-    def __init__(self, results):
+
+    def __init__(self, results: dict):
         """
         Initialize the FDTMatrixResult class with the computed results.
 
@@ -42,8 +47,9 @@ class FDTMatrixResult:
         return "\n".join(output)
 
 
-
-def fdt_cat_matrix(x, sort=True, decreasing=True):
+def fdt_cat_matrix(
+    x: np.ndarray | pd.DataFrame, sort: bool = True, decreasing: bool = True
+):
     """
     Create frequency distribution tables (FDTs) for each column in a matrix or DataFrame.
 

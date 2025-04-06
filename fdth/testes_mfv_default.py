@@ -1,4 +1,4 @@
-from mfv_default import mfv_default
+from fdth.mfv_default import mfv_default
 
 # Conjunto de dados com uma única moda
 data1 = [1, 2, 2, 3, 4]
@@ -17,9 +17,9 @@ data4 = [2, 2, 2, 2, 2]
 print("A moda de data4 é:", mfv_default(data4))
 
 # Conjunto de dados vazio
-data5 = []
+data5: list[int] = []
 print("A moda de data5 é:", mfv_default(data5))
 
 # Conjunto de dados com valores não numéricos
-data6 = ['a', 'b', 'b', 'c']
+data6 = ["a", "b", "b", "c"]
 print("A moda de data6 é:", mfv_default(data6))
