@@ -7,6 +7,10 @@ da Computação, UESC).
 
 TODO: contributors, credits and license (public domain?)
 
+## examples
+
+Examples can be found at the `examples/python` folder.
+
 ## development
 
 First of all, clone the repository (para um tutorial em português
