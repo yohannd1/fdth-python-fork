@@ -1,0 +1,12 @@
+[project]
+name = "fdth"
+version = "1.0"
+requires-python = ">= 3.10"
+dependencies = [
+    "pandas",
+    "numpy",
+    "matplotlib",
+
+    # stubs (for use with mypy)
+    "pandas-stubs",
+]
