@@ -1,5 +1,5 @@
-from summary_fdt_default import print_fdt_default
-from fdt_default import fdt_default
+from fdth.summary_fdt_default import print_fdt_default
+from fdth.fdt_default import fdt_default
 
 # Vetor inicial
 x = [6.34, 4.57, 7.89, 5.12, 4.26, 5.77, 2.95, 8.13, 3.48, 6.05, 

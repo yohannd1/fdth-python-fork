@@ -1,4 +1,4 @@
-from fdt_data_frame import fdt_data_frame
+from fdth.fdt_data_frame import fdt_data_frame
 import pandas as pd
 
 # Test 1: A simple DataFrame with a single numeric column

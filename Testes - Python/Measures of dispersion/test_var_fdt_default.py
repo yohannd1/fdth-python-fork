@@ -1,5 +1,5 @@
 import numpy as np
-from var_fdt_default import var_fdt
+from fdth.var_fdt_default import var_fdt
 
 # Dados para os testes
 data_test1 = {

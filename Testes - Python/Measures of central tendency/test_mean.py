@@ -1,5 +1,5 @@
 import numpy as np
-from mean import mean_fdt
+from fdth.mean import mean_fdt
 
 # Dados para os 4 testes
 data_test1 = {

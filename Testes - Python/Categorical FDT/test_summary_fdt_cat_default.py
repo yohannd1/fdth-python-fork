@@ -1,5 +1,5 @@
-from summary_fdt_cat_default import summary_fdt_cat_default
-from fdt_cat_default import fdt_cat_default
+from fdth.summary_fdt_cat_default import summary_fdt_cat_default
+from fdth.fdt_cat_default import fdt_cat_default
 
 # Exemplo de uso: vetor categórico
 categorias = [

@@ -1,5 +1,5 @@
 import numpy as np
-from fdt_default import fdt_default
+from fdth.fdt_default import fdt_default
 
 """
 # Teste 1

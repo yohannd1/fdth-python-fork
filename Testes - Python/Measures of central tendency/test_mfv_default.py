@@ -1,4 +1,4 @@
-from mfv_default import mfv_default
+from fdth.mfv_default import mfv_default
 
 # Conjunto de dados com uma única moda
 data1 = [1, 2, 2, 3, 4]

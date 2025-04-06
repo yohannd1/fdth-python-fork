@@ -1,4 +1,4 @@
-from fdt_cat_default import fdt_cat_default
+from fdth.fdt_cat_default import fdt_cat_default
 
 """
 # Test 1 em Python: Verifica a criação de uma tabela de frequência categórica,

@@ -1,5 +1,5 @@
 import numpy as np
-from sd_fdt_default import sd_fdt
+from fdth.sd_fdt_default import sd_fdt
 
 data_test1 = {
     'breaks': {'start': 0, 'end': 10, 'h': 2},

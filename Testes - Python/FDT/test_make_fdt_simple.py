@@ -1,5 +1,5 @@
 import numpy as np
-from make_fdt_simple import make_fdt_simple
+from fdth.make_fdt_simple import make_fdt_simple
 
 
 # Test 1: Basic intervals

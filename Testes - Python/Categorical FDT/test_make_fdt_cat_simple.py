@@ -1,4 +1,4 @@
-from make_fdt_cat_simple import make_fdt_cat_simple
+from fdth.make_fdt_cat_simple import make_fdt_cat_simple
 
 # Tests for the make_fdt_cat_simple function
 

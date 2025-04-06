@@ -1,4 +1,4 @@
-from make_fdt_multiple import make_fdt_multiple
+from fdth.make_fdt_multiple import make_fdt_multiple
 
 import pandas as pd
 import numpy as np

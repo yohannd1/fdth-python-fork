@@ -1,5 +1,5 @@
-from print_fdt_cat_default import print_fdt_cat_default
-from fdt_cat_default import fdt_cat_default
+from fdth.print_fdt_cat_default import print_fdt_cat_default
+from fdth.fdt_cat_default import fdt_cat_default
 
 # Exemplo de uso: vetor categórico
 categorias = [
@@ -11,9 +11,9 @@ categorias = [
     "Feminino", "Masculino", "Outro", "Outro", "Feminino"
 ]
 
-tdf_categorias = fdt_cat_default(x = categorias)
+tdf_categorias = fdt_cat_default(categorias)
 print(f"TDF Categorica 1\n")
-print_fdt_cat_default(x = tdf_categorias, columns = [0, 1, 3, 4], round=2, row_names=False, right=False)
+print_fdt_cat_default(tdf_categorias, columns = [0, 1, 3, 4], round=2, row_names=False, right=False)
 print()
 
 # Exemplo de vetor categórico com números e texto
@@ -25,5 +25,5 @@ categorias2 = [
 
 tdf_categorias2 = fdt_cat_default(categorias2)
 print(f"TDF Categorica 2\n")
-print_fdt_cat_default(x = tdf_categorias2, round=2)
+print_fdt_cat_default(tdf_categorias2, round=2)
 print()

@@ -1,5 +1,5 @@
 import numpy as np
-from fdt_matrix import fdt_matrix  
+from fdth.fdt_matrix import fdt_matrix
 
 
 # Input matrix for testing

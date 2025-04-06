@@ -1,6 +1,6 @@
 import pandas as pd
-from fdt_cat_data_frame import fdt_cat_data_frame  # Supondo que este módulo já está implementado.
-from plot_fdt_cat_default import plot_fdt_cat  # Supondo que este módulo já está implementado.
+from fdth.fdt_cat_data_frame import fdt_cat_data_frame  # Supondo que este módulo já está implementado.
+from fdth.plot_fdt_cat_default import plot_fdt_cat  # Supondo que este módulo já está implementado.
 
 # Dados de exemplo corrigidos
 data = {

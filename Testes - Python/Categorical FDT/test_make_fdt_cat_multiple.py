@@ -1,5 +1,5 @@
 import pandas as pd
-from make_fdt_cat_multiple import make_fdt_cat_multiple
+from fdth.make_fdt_cat_multiple import make_fdt_cat_multiple
 
 # Test Data 1
 data = {
