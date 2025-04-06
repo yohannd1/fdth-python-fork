@@ -16,8 +16,6 @@ class FDTResultMultiple:
         Parameters:
             results (dict): A dictionary where keys are column or group-column names
                             and values are DataFrames containing the FDT for each case.
-
-        :param results: foo
         """
         self.results = results
 
