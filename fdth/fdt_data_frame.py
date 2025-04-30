@@ -1,83 +1,170 @@
+#2. Class Para dados numéricos #LIMITES APROXIMADOS
+
 import pandas as pd
 import numpy as np
-from fdth.make_fdt_multiple import make_fdt_multiple
+import matplotlib.pyplot as plt
+
+class NumericalFrequencyDistribution:
+    def __init__(self, data):
+        if not isinstance(data, (pd.Series, list, np.ndarray)):
+            raise ValueError("Dados devem ser uma lista, Series ou ndarray.")
+        
+        self.data = pd.Series(data).dropna()
+        self.data = pd.to_numeric(self.data, errors='coerce').dropna()
+
+        self.n = len(self.data)
+        self.k = int(np.ceil(1 + 3.322 * np.log10(self.n)))  # Regra de Sturges para determinar os intervalos
+        self.h = (self.data.max() - self.data.min()) / self.k
+        self.bins = np.arange(self.data.min(), self.data.max() + self.h, self.h)
+
+        self.freq, _ = np.histogram(self.data, bins=self.bins)
+        self.midpoints = 0.5 * (self.bins[:-1] + self.bins[1:])
+        self.cum_freq = np.cumsum(self.freq)
+
+        # Tabela de frequência
+        self.fdt = pd.DataFrame({
+            "Intervalo": list(zip(np.round(self.bins[:-1], 2), np.round(self.bins[1:], 2))),
+            "Frequência": self.freq,
+            "Frequência Acumulada": self.cum_freq,
+            "Ponto Médio": np.round(self.midpoints, 2)
+        })
+
+    def make_fdt(self):
+        return self.fdt
+
+    def mean_fdt(self):
+        # Cálculo da média
+        mean = np.sum(self.midpoints * self.freq) / self.n
+        return mean  
+
+    def var_fdt(self):
+        # Cálculo da variância
+        mean = self.mean_fdt()  # Vai chamar a função que já retorna a média
+        variance = np.sum(((self.midpoints - mean) ** 2) * self.freq) / (self.n - 1)
+        return variance  
+
+    def median_fdt(self):
+        # Cálculo da mediana
+        n_2 = self.n / 2
+        idx = np.where(self.cum_freq >= n_2)[0][0]
+
+        Li = self.bins[idx]  # Limite inferior da classe mediana
+        Fi = self.freq[idx]  # Frequência da classe mediana
+        F_acum_antes = self.cum_freq[idx - 1] if idx > 0 else 0
+
+        median = Li + ((n_2 - F_acum_antes) * self.h) / Fi
+        return median  
+
+    def plot_histogram(self):
+        plt.hist(self.data, bins=self.bins, edgecolor='black')
+        plt.title("Histograma")
+        plt.xlabel("Valor")
+        plt.ylabel("Frequência")
+        plt.show()
 
 
-class FDTResult:
-    """
-    Class to encapsulate the results of frequency distribution tables and provide formatted output.
-    """
-
-    def __init__(self, results):
-        self.results = results
-
-    def __str__(self):
-        output = []
-        for key, value in self.results.items():
-            output.append(f"--- {key} ---")
-            output.append("Table:")
-            output.append(
-                value["table"].to_string(index=False)
-            )  # Convert the table to a readable string
-            output.append("\nBreaks:")
-            for break_key, break_value in value["breaks"].items():
-                output.append(f"  {break_key}: {break_value}")
-            output.append("")  # Empty line to separate groups
-        return "\n".join(output)
 
 
-def fdt_data_frame(x, k=None, by=None, breaks="Sturges", right=False, na_rm=False):
-    """
-    Create frequency distribution tables for numeric columns in a DataFrame.
+#######LIMITES NÃO APROXIMADOS####
 
-    Parameters:
-    x (DataFrame): Input data.
-    k (int, optional): Number of classes. If not provided, it will be calculated based on `breaks`.
-    by (str, optional): Column name to group by (must be a factor/categorical column).
-    breaks (str, optional): Method to calculate the number of classes ('Sturges', 'Scott', 'FD').
-    right (bool, optional): Whether to include the right endpoint in each interval.
-    na_rm (bool, optional): Whether to remove NA values from the data.
 
-    Returns:
-    FDTResult: A custom object containing the frequency distribution tables.
-    """
-    if not isinstance(x, pd.DataFrame):
-        raise ValueError("Input x must be a DataFrame.")
+# import numpy as np
+# import pandas as pd
+# import matplotlib.pyplot as plt
 
-    results = {}
+# class NumericalFrequencyDistribution:
+#     def __init__(self, data):
+#         """
+#         Inicializa a classe para dados numéricos.
+#         """
+#         if not isinstance(data, (pd.Series, list)):
+#             raise ValueError("Dados devem ser uma lista ou uma Series do pandas.")
+        
+#         self.data = pd.Series(data) if isinstance(data, list) else data
+#         self.data = pd.to_numeric(self.data, errors='coerce')  # Convertendo para numérico
+        
+#         self.breaks = self._define_breaks()
+#         self.table = self._build_fdt_table()
 
-    if by is None:
-        # Process all numeric columns
-        for column in x.select_dtypes(include=[np.number]).columns:
-            column_data = x[column].dropna() if na_rm else x[column]
-            fdt_result = make_fdt_multiple(
-                column_data, k=k, breaks=breaks, right=right, na_rm=na_rm
-            )
-            results[column] = {
-                "table": fdt_result["table"],
-                "breaks": fdt_result["breaks"],
-            }
-    else:
-        # Group by the specified column and process numeric columns in each group
-        if by not in x.columns:
-            raise ValueError(f"Column '{by}' not found in the DataFrame.")
-        if not pd.api.types.is_categorical_dtype(
-            x[by]
-        ) and not pd.api.types.is_object_dtype(x[by]):
-            raise ValueError(f"Column '{by}' must be categorical or of type object.")
+#     def _define_breaks(self):
+#         """
+#         Define os limites dos intervalos automaticamente com base nos dados.
+#         """
+#         bins = np.histogram_bin_edges(self.data, bins='auto')
+#         return {
+#             "start": bins[0],
+#             "end": bins[-1],
+#             "h": bins[1] - bins[0],
+#             "bins": bins
+#         }
 
-        grouped = x.groupby(by)
-        for group_name, group_data in grouped:
-            for column in group_data.select_dtypes(include=[np.number]).columns:
-                column_data = (
-                    group_data[column].dropna() if na_rm else group_data[column]
-                )
-                fdt_result = make_fdt_multiple(
-                    column_data, k=k, breaks=breaks, right=right, na_rm=na_rm
-                )
-                results[f"{group_name}.{column}"] = {
-                    "table": fdt_result["table"],
-                    "breaks": fdt_result["breaks"],
-                }
+#     def _build_fdt_table(self):
+#         """
+#         Constrói a tabela de distribuição de frequência.
+#         """
+#         breaks = self.breaks["bins"]
+#         freq, _ = np.histogram(self.data, bins=breaks)
+#         cum_freq = np.cumsum(freq)
+#         intervals = list(zip(breaks[:-1], breaks[1:]))
 
-    return FDTResult(results)
+#         return pd.DataFrame({
+#             "Interval": intervals,
+#             "Frequency": freq,
+#             "Cumulative Frequency": cum_freq
+#         })
+
+#     def make_fdt(self):
+#         """
+#         Retorna a tabela de distribuição de frequência.
+#         """
+#         return self.table
+
+#     def mean_fdt(self):
+#         """
+#         Calcula a média da distribuição de frequência.
+#         """
+#         breaks = self.breaks["bins"]
+#         mids = 0.5 * (breaks[:-1] + breaks[1:])
+#         y = self.table["Frequency"].values
+#         return np.sum(y * mids) / np.sum(y)
+
+#     def var_fdt(self):
+#         """
+#         Calcula a variância da distribuição de frequência.
+#         """
+#         breaks = self.breaks["bins"]
+#         mids = 0.5 * (breaks[:-1] + breaks[1:])
+#         y = self.table["Frequency"].values
+#         mean = self.mean_fdt()
+#         return np.sum((mids - mean) ** 2 * y) / (np.sum(y) - 1)
+
+#     def median_fdt(self):
+#         """
+#         Calcula a mediana da distribuição de frequência.
+#         """
+#         fdt = self.table
+#         n = fdt["Cumulative Frequency"].iloc[-1]
+#         posM = (n / 2 <= fdt["Cumulative Frequency"]).idxmax()
+
+#         breaks = self.breaks["bins"]
+#         liM = breaks[posM]  # limite inferior da classe mediana
+
+#         if posM - 1 < 0:
+#             sfaM = 0
+#         else:
+#             sfaM = fdt["Cumulative Frequency"].iloc[posM - 1]
+
+#         fM = fdt["Frequency"].iloc[posM]
+#         h = self.breaks["h"]
+
+#         return liM + (((n / 2) - sfaM) * h) / fM
+
+#     def plot_histogram(self):
+#         """
+#         Plota o histograma dos dados.
+#         """
+#         plt.hist(self.data, bins=self.breaks["bins"], edgecolor='black')
+#         plt.title("Histograma de Dados Numéricos")
+#         plt.xlabel("Valores")
+#         plt.ylabel("Frequência")
+#         plt.show()

@@ -1,95 +1,137 @@
+# 1. Class CategoricalFrequencyDistribution (para dados categóricos)
+
 import pandas as pd
-from fdth.make_fdt_cat_multiple import make_fdt_cat_multiple
-from typing import Optional
+import numpy as np
+import matplotlib.pyplot as plt
 
+class CategoricalFrequencyDistribution:
 
-class FDTResultMultiple:
-    """
-    Class to encapsulate the results of frequency distribution tables (FDTs)
-    for multiple columns and provide formatted output.
-    """
-
-    def __init__(self, results: dict):
+    def __init__(self, data):
         """
-        Initialize the FDTResultMultiple class with the computed results.
+        Inicializa a classe para dados categóricos.
+        """
+        if not isinstance(data, (pd.Series, list)):
+            raise ValueError("Dados devem ser uma lista ou uma Series do pandas.")
+        
+        self.data = pd.Series(data) if isinstance(data, list) else data
+        self.data = self.data.astype('category')  # Convertendo para categoria
+
+        def __str__(self) -> str:
+            """
+            Provide a formatted string representation of the FDT results.
+
+            Returns:
+                str: A formatted string containing the FDT for each column or group.
+            """
+            output = []
+            for key, value in self.results.items():
+                output.append(f"--- {key} ---")
+                output.append("Table:")
+                output.append(value.to_string(index=True))
+                output.append("")
+            return "\n".join(output)
+    
+   
+    def make_fdt_cat_simple(self, x, sort=False, decreasing=False):
+        """
+        Creates a frequency distribution table (FDT) for categorical data.
+        
+        Parameters:
+        x (list or pd.Series): The input data, which must be a list or pandas Series.
+        sort (bool): If True, sorts the table by frequency. Default is False.
+        decreasing (bool): If sort is True, sorts in descending order if True, otherwise in ascending order. Default is False.
+        
+        Returns:
+        pd.DataFrame: A DataFrame containing the following columns:
+            - 'Category': The unique categories.
+            - 'f': The absolute frequency of each category.
+            - 'rf': The relative frequency of each category.
+            - 'rf(%)': The relative frequency expressed as a percentage.
+            - 'cf': The cumulative absolute frequency.
+            - 'cf(%)': The cumulative relative frequency expressed as a percentage.
+        """
+        if not isinstance(x, (pd.Series, list)):
+            raise ValueError("Input data must be a list or pandas Series.")
+
+        # Convert to pandas Series if it's a list
+        x = pd.Series(x)
+
+        if not (x.dtypes == "object" or x.dtypes.name == "category"):
+            raise ValueError("Values must be strings or categorical.")
+
+        # Convert to categorical type
+        x = x.astype("category")
+
+        # Check if there are valid categories
+        if len(x.cat.categories) == 0:
+            raise ValueError("No valid categories found in the data.")
+
+        # Calculate absolute frequency
+        f = x.value_counts(sort=False)
+
+        if sort:
+            # Sort by absolute frequencies
+            f = f.sort_values(ascending=not decreasing)
+
+        # Calculate relative frequencies and cumulative frequencies
+        rf = f / f.sum()  # Relative frequency
+        rfp = rf * 100  # Relative frequency as a percentage
+        cf = f.cumsum()  # Cumulative absolute frequency
+        cfp = rfp.cumsum()  # Cumulative relative frequency as a percentage
+
+        # Ensure the result is returned as a DataFrame
+        res = pd.DataFrame(
+            {
+                "Category": f.index,
+                "f": f.values,
+                "rf": rf.values,
+                "rf(%)": rfp.values,
+                "cf": cf.values,
+                "cf(%)": cfp.values,
+            }
+        )
+        return res
+
+    def generate_fdt(self,df, column_name):
+        """
+        This function will generate the frequency distribution table for the specified column in the dataframe.
 
         Parameters:
-            results (dict): A dictionary where keys are column or group-column names
-                            and values are DataFrames containing the FDT for each case.
-        """
-        self.results = results
-
-    def __str__(self) -> str:
-        """
-        Provide a formatted string representation of the FDT results.
-
+        df (pd.DataFrame): The input dataframe.
+        column_name (str): The column name to generate the FDT for.
+        
         Returns:
-            str: A formatted string containing the FDT for each column or group.
+        pd.DataFrame: A DataFrame with the frequency distribution table for the specified column.
         """
-        output = []
-        for key, value in self.results.items():
-            output.append(f"--- {key} ---")
-            output.append("Table:")
-            output.append(value.to_string(index=True))
-            output.append("")
-        return "\n".join(output)
+        # Check if the DataFrame has the specified column
+        if column_name not in df.columns:
+            raise ValueError(f"Column '{column_name}' not found in the DataFrame.")
+        
+        # Ensure the column is categorical
+        df[column_name] = df[column_name].astype('category')
+        
+        # Generate the FDT for the specified column
+        fdt_result = self.make_fdt_cat_simple(df[column_name], sort=True, decreasing=True)
+        return fdt_result
 
+    def plot_histogram(self):
+        """
+        Cria o histograma para dados categóricos.
+        """
+        category_counts = pd.Series(self.data).value_counts()
 
-def fdt_cat_data_frame(
-    df: pd.DataFrame,
-    by: Optional[str] = None,
-    sort: bool = True,
-    decreasing: bool = True,
-) -> FDTResultMultiple:
-    """
-    Generate frequency distribution tables (FDTs) for categorical columns in a DataFrame,
-    optionally grouped by a specified column.
+        # Plotando o gráfico de barras
+        category_counts.plot(kind='bar', color='skyblue', edgecolor='black')
 
-    Parameters:
-        df (pd.DataFrame): Input DataFrame.
-        by (str, optional): Column name to group the data by. Default is None.
-        sort (bool): If True, sort the FDT by frequency. Default is True.
-        decreasing (bool): If sort is True, sorts in descending order if True,
-                           otherwise in ascending order. Default is True.
-
-    Returns:
-        FDTResultMultiple: An object containing the FDTs for all relevant columns.
-
-    Raises:
-        ValueError: If the input is not a DataFrame, the grouping column is not present,
-                    or the grouping column is not categorical.
-    """
-    if not isinstance(df, pd.DataFrame):
-        raise ValueError("The parameter 'df' must be a pandas DataFrame.")
-
-    results = {}
-
-    if by is None:
-        # If no grouping column is specified
-        categorical_columns = df.select_dtypes(include=["category", "object"]).columns
-        for col in categorical_columns:
-            fdt = make_fdt_cat_multiple(df[[col]], sort=sort, decreasing=decreasing)
-            results[col] = fdt.results[col]
-    else:
-        # If a grouping column is specified
-        if by not in df.columns:
-            raise ValueError(f"The column '{by}' is not present in the DataFrame.")
-        if not pd.api.types.is_categorical_dtype(
-            df[by]
-        ) and not pd.api.types.is_object_dtype(df[by]):
-            raise ValueError(f"The column '{by}' must be categorical.")
-
-        # Avoid FutureWarning for groupby
-        groups = df.groupby(by, observed=False)
-        for group_name, group_data in groups:
-            group_df = group_data.drop(columns=by)
-            categorical_columns = group_df.select_dtypes(
-                include=["category", "object"]
-            ).columns
-            for col in categorical_columns:
-                fdt = make_fdt_cat_multiple(
-                    group_df[[col]], sort=sort, decreasing=decreasing
-                )
-                results[f"{group_name}.{col}"] = fdt.results[col]
-
-    return FDTResultMultiple(results)
+        # Definindo título e rótulos
+        plt.title("Histograma de Dados Categóricos")
+        plt.xlabel("Categorias")
+        plt.ylabel("Frequência")
+        plt.xticks(rotation=0)  # Rotaciona os rótulos das categorias para ficarem legíveis
+        plt.show()
+    
+    def calculate_mode(self):
+        """
+        Calcula a moda (valor mais frequente) dos dados categóricos.
+        """
+        return self.data.mode().iloc[0]
