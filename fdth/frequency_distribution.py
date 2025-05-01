@@ -1,38 +1,27 @@
-#Classe FrequencyDistribution (que decide qual classe usar dependendo do tipo de dado)
+from abc import abstractmethod
 
-from fdth.fdt_cat_data_frame import CategoricalFrequencyDistribution
-from fdth.fdt_data_frame import NumericalFrequencyDistribution
 import pandas as pd
 import numpy as np
 
 class FrequencyDistribution:
-    def __init__(self, data):
+    @abstractmethod
+    def get_table(self) -> pd.DataFrame: ...
+
+    @abstractmethod
+    def mean(self): ...
+
+    @abstractmethod
+    def mode(self):
         """
-        Inicializa a classe de distribuição de frequência dependendo do tipo de dado.
+        Calcula a moda (valor mais frequente) dos dados.
         """
-        # Verificando se os dados são uma lista ou um pandas Series
-        if isinstance(data, list):
-            data = pd.Series(data)  # Convertendo lista para pandas Series
-        elif not isinstance(data, pd.Series):
-            raise ValueError("Data must be a list or pandas Series.")
-        
-        self.data = data
+        pass
 
-        # Se for dado categórico
-        if self.data.dtype == 'object' or isinstance(self.data.iloc[0], str):
-            self.distribution = CategoricalFrequencyDistribution(self.data)
-        else:
-            # Se for dado numérico
-            self.distribution = NumericalFrequencyDistribution(self.data)
+    @abstractmethod
+    def median(self): ...
 
-    def make_fdt(self):
-        return self.distribution.make_fdt()
+    @abstractmethod
+    def var(self): ...
 
-    def mean_fdt(self):
-        return self.distribution.mean_fdt()
-
-    def var_fdt(self):
-        return self.distribution.var_fdt()
-
-    def plot_histogram(self):
-        return self.distribution.plot_histogram()
+    @abstractmethod
+    def plot_histogram(self) -> None: ...

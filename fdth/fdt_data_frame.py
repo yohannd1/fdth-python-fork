@@ -1,19 +1,23 @@
-#2. Class Para dados numéricos #LIMITES APROXIMADOS
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-class NumericalFrequencyDistribution:
-    def __init__(self, data):
-        if not isinstance(data, (pd.Series, list, np.ndarray)):
-            raise ValueError("Dados devem ser uma lista, Series ou ndarray.")
-        
-        self.data = pd.Series(data).dropna()
-        self.data = pd.to_numeric(self.data, errors='coerce').dropna()
+from fdth import FrequencyDistribution
+
+class NumericalFrequencyDistribution(FrequencyDistribution):
+    def __init__(self, data: pd.Series | list | np.ndarray):
+        if isinstance(data, (list, np.ndarray)):
+            self.data = pd.Series(data)
+        elif isinstance(data, pd.Series):
+            self.data = data
+        else:
+            raise TypeError("Data must be a list, a pandas.Series or an numpy.ndarray")
+
+        self.data = self.data.dropna()
+        self.data = pd.to_numeric(self.data, errors="coerce").dropna()
 
         self.n = len(self.data)
-        self.k = int(np.ceil(1 + 3.322 * np.log10(self.n)))  # Regra de Sturges para determinar os intervalos
+        self.k = int(np.ceil(1 + 3.322 * np.log10(self.n))) # Regra de Sturges para determinar os intervalos
         self.h = (self.data.max() - self.data.min()) / self.k
         self.bins = np.arange(self.data.min(), self.data.max() + self.h, self.h)
 
@@ -29,22 +33,13 @@ class NumericalFrequencyDistribution:
             "Ponto Médio": np.round(self.midpoints, 2)
         })
 
-    def make_fdt(self):
+    def get_table(self) -> pd.DataFrame:
         return self.fdt
 
-    def mean_fdt(self):
-        # Cálculo da média
-        mean = np.sum(self.midpoints * self.freq) / self.n
-        return mean  
+    def mean(self):
+        return np.sum(self.midpoints * self.freq) / self.n
 
-    def var_fdt(self):
-        # Cálculo da variância
-        mean = self.mean_fdt()  # Vai chamar a função que já retorna a média
-        variance = np.sum(((self.midpoints - mean) ** 2) * self.freq) / (self.n - 1)
-        return variance  
-
-    def median_fdt(self):
-        # Cálculo da mediana
+    def median(self):
         n_2 = self.n / 2
         idx = np.where(self.cum_freq >= n_2)[0][0]
 
@@ -53,20 +48,22 @@ class NumericalFrequencyDistribution:
         F_acum_antes = self.cum_freq[idx - 1] if idx > 0 else 0
 
         median = Li + ((n_2 - F_acum_antes) * self.h) / Fi
-        return median  
+        return median
 
-    def plot_histogram(self):
-        plt.hist(self.data, bins=self.bins, edgecolor='black')
+    def mode(self):
+        pass
+
+    def var(self):
+        return np.sum(((self.midpoints - self.mean()) ** 2) * self.freq) / (self.n - 1)
+
+    def plot_histogram(self) -> None:
+        plt.hist(self.data, bins=self.bins, edgecolor="black")
         plt.title("Histograma")
         plt.xlabel("Valor")
         plt.ylabel("Frequência")
         plt.show()
 
-
-
-
-#######LIMITES NÃO APROXIMADOS####
-
+#### LIMITES NÃO APROXIMADOS ####
 
 # import numpy as np
 # import pandas as pd
@@ -79,10 +76,10 @@ class NumericalFrequencyDistribution:
 #         """
 #         if not isinstance(data, (pd.Series, list)):
 #             raise ValueError("Dados devem ser uma lista ou uma Series do pandas.")
-        
+
 #         self.data = pd.Series(data) if isinstance(data, list) else data
-#         self.data = pd.to_numeric(self.data, errors='coerce')  # Convertendo para numérico
-        
+#         self.data = pd.to_numeric(self.data, errors="coerce")  # Convertendo para numérico
+
 #         self.breaks = self._define_breaks()
 #         self.table = self._build_fdt_table()
 
@@ -90,7 +87,7 @@ class NumericalFrequencyDistribution:
 #         """
 #         Define os limites dos intervalos automaticamente com base nos dados.
 #         """
-#         bins = np.histogram_bin_edges(self.data, bins='auto')
+#         bins = np.histogram_bin_edges(self.data, bins="auto")
 #         return {
 #             "start": bins[0],
 #             "end": bins[-1],
@@ -163,7 +160,7 @@ class NumericalFrequencyDistribution:
 #         """
 #         Plota o histograma dos dados.
 #         """
-#         plt.hist(self.data, bins=self.breaks["bins"], edgecolor='black')
+#         plt.hist(self.data, bins=self.breaks["bins"], edgecolor="black")
 #         plt.title("Histograma de Dados Numéricos")
 #         plt.xlabel("Valores")
 #         plt.ylabel("Frequência")
