@@ -1,20 +1,37 @@
+from typing import Optional
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
 from fdth import FrequencyDistribution
 
+
 class CategoricalFrequencyDistribution(FrequencyDistribution):
-    def __init__(self, data: pd.Series | list):
+    def __init__(
+        self,
+        data: pd.DataFrame | pd.Series | list,
+        sort: bool = True,
+        decreasing: bool = False,
+        column_name: Optional[str] = None,
+    ):
+        self.sort = sort
+        self.decreasing = decreasing
+
+        self.data: pd.Series
         if isinstance(data, list):
             self.data = pd.Series(data)
         elif isinstance(data, pd.Series):
             self.data = data
+        elif isinstance(data, pd.DataFrame):
+            raise NotImplementedError(
+                "TODO: use `column_name` and `self._generate_fdt`"
+            )
         else:
-            raise TypeError("Data must be a list or pandas.Series")
+            raise TypeError("Data must be a list, a pandas.DataFrame or pandas.Series")
 
-        self.data = self.data.astype("category") # convert to category type
-        self.fdt: pd.DataFrame | None = None
+        self.data = self.data.astype("category")  # convert to category type
+        self.table: pd.DataFrame | None = None
 
     def ___str___(self) -> str:
         # FIXME: acho que isso aqui não funciona mais (e não por estar com ___ e não __)
@@ -33,9 +50,12 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         return "\n".join(output)
 
     def get_table(self) -> pd.DataFrame:
-        if self.fdt is None:
-            self.fdt = self._make_table(self.data) # TODO: especificar sort & decreasing
-        return self.fdt
+        """Get the frequency distribution table as a DataFrame."""
+        if self.table is None:
+            self.table = self._make_table(
+                self.data,
+            )  # TODO: especificar sort & decreasing
+        return self.table
 
     def plot_histogram(self) -> None:
         category_counts = pd.Series(self.data).value_counts()
@@ -47,7 +67,9 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         plt.title("Histograma de Dados Categóricos")
         plt.xlabel("Categorias")
         plt.ylabel("Frequência")
-        plt.xticks(rotation=0)  # Rotaciona os rótulos das categorias para ficarem legíveis
+        plt.xticks(
+            rotation=0
+        )  # Rotaciona os rótulos das categorias para ficarem legíveis
         plt.show()
 
     def mean(self):
@@ -60,14 +82,15 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         return self.data.mode().iloc[0]
 
     @staticmethod
-    def _make_table(x: list | pd.Series, sort: bool = False, decreasing: bool = False) -> pd.DataFrame:
+    def _make_table(
+        x: pd.Series, sort: bool = False, decreasing: bool = False
+    ) -> pd.DataFrame:
         """
         Creates a frequency distribution table (FDT) for categorical data.
 
-        Parameters:
-        x (list or pd.Series): The input data, which must be a list or pandas Series.
-        sort (bool): If True, sorts the table by frequency. Default is False.
-        decreasing (bool): If sort is True, sorts in descending order if True, otherwise in ascending order. Default is False.
+        :param x: the input data.
+        :param sort: if True, sorts the table by frequency.
+        :param decreasing: if True, sorts in descending order.
 
         Returns:
         pd.DataFrame: A DataFrame containing the following columns:
@@ -120,18 +143,18 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         )
         return res
 
-    def generate_fdt(self, df, column_name):
-        # FIXME: acho bom mover isso para outro lugar. Não tenho certeza
+    @staticmethod
+    def _generate_fdt(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
+        # FIXME: acho bom mover isso para outro lugar
         """
-        This function will generate the frequency distribution table for the specified column in the dataframe.
+        Generate the frequency distribution table for the specified column in the DataFrame.
 
-        Parameters:
-        df (pd.DataFrame): The input dataframe.
-        column_name (str): The column name to generate the FDT for.
+        :param df: the input dataframe
+        :param column_name: the column name to generate the FDT for
 
-        Returns:
-        pd.DataFrame: A DataFrame with the frequency distribution table for the specified column.
+        :return: a DataFrame with the frequency distribution table for the specified column.
         """
+
         # Check if the DataFrame has the specified column
         if column_name not in df.columns:
             raise ValueError(f"Column '{column_name}' not found in the DataFrame.")
@@ -140,5 +163,6 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         df[column_name] = df[column_name].astype("category")
 
         # Generate the FDT for the specified column
-        fdt_result = self.make_fdt_cat_simple(df[column_name], sort=True, decreasing=True)
-        return fdt_result
+        return CategoricalFrequencyDistribution._make_table(
+            df[column_name], sort=True, decreasing=True
+        )

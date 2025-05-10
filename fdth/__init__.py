@@ -1,8 +1,8 @@
 import pandas as pd
 
 from .frequency_distribution import FrequencyDistribution
-from .fdt_data_frame import NumericalFrequencyDistribution
-from .fdt_cat_data_frame import CategoricalFrequencyDistribution
+from .numerical_fdt import NumericalFrequencyDistribution
+from .categorical_fdt import CategoricalFrequencyDistribution
 
 def fdt(data: pd.Series | list) -> FrequencyDistribution:
     """
