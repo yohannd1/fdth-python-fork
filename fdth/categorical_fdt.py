@@ -33,22 +33,6 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         self.data = self.data.astype("category")  # convert to category type
         self.table: pd.DataFrame | None = None
 
-    def ___str___(self) -> str:
-        # FIXME: acho que isso aqui não funciona mais (e não por estar com ___ e não __)
-        """
-        Provide a formatted string representation of the FDT results.
-
-        Returns:
-            str: A formatted string containing the FDT for each column or group.
-        """
-        output = []
-        for key, value in self.results.items():
-            output.append(f"--- {key} ---")
-            output.append("Table:")
-            output.append(value.to_string(index=True))
-            output.append("")
-        return "\n".join(output)
-
     def get_table(self) -> pd.DataFrame:
         """Get the frequency distribution table as a DataFrame."""
         if self.table is None:
