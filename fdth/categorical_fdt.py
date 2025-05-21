@@ -37,23 +37,24 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         """Get the frequency distribution table as a DataFrame."""
         if self.table is None:
             self.table = self._make_table(
-                self.data,
-            )  # TODO: especificar sort & decreasing
+                self.data, sort=self.sort, decreasing=self.decreasing
+            )
         return self.table
 
     def plot_histogram(self) -> None:
         category_counts = pd.Series(self.data).value_counts()
 
-        # Plotando o gráfico de barras
+        # plotar o gráfico de barras
         category_counts.plot(kind="bar", color="skyblue", edgecolor="black")
 
-        # Definindo título e rótulos
+        # definir título e rótulos
         plt.title("Histograma de Dados Categóricos")
         plt.xlabel("Categorias")
         plt.ylabel("Frequência")
-        plt.xticks(
-            rotation=0
-        )  # Rotaciona os rótulos das categorias para ficarem legíveis
+
+        # rotacionar os rótulos das categorias para ficarem legíveis
+        plt.xticks(rotation=0)
+
         plt.show()
 
     def mean(self):

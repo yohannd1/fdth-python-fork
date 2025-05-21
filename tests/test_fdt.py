@@ -1,7 +1,7 @@
-from fdth import fdt, NumericalFrequencyDistribution, CategoricalFrequencyDistribution
-
 import unittest
 import pandas as pd
+
+from fdth import fdt, NumericalFrequencyDistribution, CategoricalFrequencyDistribution
 
 class Test(unittest.TestCase):
     def test_numerical_fdt(self):
@@ -12,9 +12,16 @@ class Test(unittest.TestCase):
         _ = fd.mean()
         _ = fd.median()
         _ = fd.var()
+        _ = fd.plot_histogram()
 
     def test_categorical_fdt(self):
         data = ["a", "b", "a", "c", "c"]
         fd = fdt(data)
         assert isinstance(fd, CategoricalFrequencyDistribution)
         _ = fd.get_table()
+        _ = fd.plot_histogram()
+
+    def test_categorical_fdt_mixed(self):
+        data = [1, 5, "b"]
+        fd = fdt(data)
+        assert isinstance(fd, CategoricalFrequencyDistribution)

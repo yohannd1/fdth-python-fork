@@ -4,8 +4,12 @@ import matplotlib.pyplot as plt
 
 from fdth import FrequencyDistribution
 
+
 class NumericalFrequencyDistribution(FrequencyDistribution):
-    def __init__(self, data: pd.Series | list | np.ndarray):
+    def __init__(
+        self,
+        data: pd.Series | list | np.ndarray,
+    ):
         if isinstance(data, (list, np.ndarray)):
             self.data = pd.Series(data)
         elif isinstance(data, pd.Series):
@@ -17,7 +21,9 @@ class NumericalFrequencyDistribution(FrequencyDistribution):
         self.data = pd.to_numeric(self.data, errors="coerce").dropna()
 
         self.n = len(self.data)
-        self.k = int(np.ceil(1 + 3.322 * np.log10(self.n))) # Regra de Sturges para determinar os intervalos
+        self.k = int(
+            np.ceil(1 + 3.322 * np.log10(self.n))
+        )  # Regra de Sturges para determinar os intervalos
         self.h = (self.data.max() - self.data.min()) / self.k
         self.bins = np.arange(self.data.min(), self.data.max() + self.h, self.h)
 
@@ -26,12 +32,16 @@ class NumericalFrequencyDistribution(FrequencyDistribution):
         self.cum_freq = np.cumsum(self.freq)
 
         # Tabela de frequência
-        self.fdt = pd.DataFrame({
-            "Intervalo": list(zip(np.round(self.bins[:-1], 2), np.round(self.bins[1:], 2))),
-            "Frequência": self.freq,
-            "Frequência Acumulada": self.cum_freq,
-            "Ponto Médio": np.round(self.midpoints, 2)
-        })
+        self.fdt = pd.DataFrame(
+            {
+                "Intervalo": list(
+                    zip(np.round(self.bins[:-1], 2), np.round(self.bins[1:], 2))
+                ),
+                "Frequência": self.freq,
+                "Frequência Acumulada": self.cum_freq,
+                "Ponto Médio": np.round(self.midpoints, 2),
+            }
+        )
 
     def get_table(self) -> pd.DataFrame:
         return self.fdt
@@ -62,6 +72,7 @@ class NumericalFrequencyDistribution(FrequencyDistribution):
         plt.xlabel("Valor")
         plt.ylabel("Frequência")
         plt.show()
+
 
 #### LIMITES NÃO APROXIMADOS ####
 
