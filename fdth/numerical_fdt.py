@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from fdth import FrequencyDistribution
 
 
-class NumericalFrequencyDistribution(FrequencyDistribution):
+class NumericalFDT(FrequencyDistribution):
     def __init__(
         self,
         data: pd.Series | list | np.ndarray,
@@ -80,7 +80,7 @@ class NumericalFrequencyDistribution(FrequencyDistribution):
 # import pandas as pd
 # import matplotlib.pyplot as plt
 
-# class NumericalFrequencyDistribution:
+# class NumericalFDT:
 #     def __init__(self, data):
 #         """
 #         Inicializa a classe para dados numéricos.

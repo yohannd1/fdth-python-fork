@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from fdth import FrequencyDistribution
 
 
-class CategoricalFrequencyDistribution(FrequencyDistribution):
+class CategoricalFDT(FrequencyDistribution):
     def __init__(
         self,
         data: pd.DataFrame | pd.Series | list,
@@ -148,6 +148,6 @@ class CategoricalFrequencyDistribution(FrequencyDistribution):
         df[column_name] = df[column_name].astype("category")
 
         # Generate the FDT for the specified column
-        return CategoricalFrequencyDistribution._make_table(
+        return CategoricalFDT._make_table(
             df[column_name], sort=True, decreasing=True
         )
