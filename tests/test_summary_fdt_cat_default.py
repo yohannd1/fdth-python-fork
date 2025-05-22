@@ -1,7 +1,6 @@
-from fdth.summary_fdt_cat_default import summary_fdt_cat_default
-
 import unittest
 
+from fdth.summary_fdt_cat_default import summary_fdt_cat_default
 from fdth import fdt
 
 

@@ -11,6 +11,7 @@ FdtKind = Literal["numerical", "categorical", "auto"]
 
 def fdt(
     data: pd.Series | list,
+    *,
     kind: FdtKind = "auto",
     sort: bool = True,
     decreasing: bool = True,
