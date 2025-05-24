@@ -1,5 +1,4 @@
 import numpy as np
-from fdth.mean import mean_fdt  # Importando a função mean_fdt
 
 
 def var_fdt(x):
@@ -15,7 +14,7 @@ def var_fdt(x):
     y = x["table"][:, 1]
 
     # Calcular média usando a função mean_fdt
-    mean_fdt_value = mean_fdt(x)
+    mean_fdt_value = x["table"].mean()
 
     # Calcular variância ponderada
     res = np.sum((mids - mean_fdt_value) ** 2 * y) / (np.sum(y) - 1)

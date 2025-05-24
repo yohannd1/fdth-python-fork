@@ -58,7 +58,7 @@ class NumericalFDT(FrequencyDistribution):
         mids = 0.5 * (breaks[:-1] + breaks[1:])
 
         # frequencies of each class
-        y = x["table"][:, 1]
+        y = self._fdt[:, 1]
 
         # return the weighted mean of the midpoints
         return np.sum(y * mids) / np.sum(y)
