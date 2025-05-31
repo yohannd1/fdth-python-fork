@@ -25,3 +25,21 @@ class Test(unittest.TestCase):
         data = [1, 5, "b"]
         fd = fdt(data)
         assert isinstance(fd, CategoricalFDT)
+
+    def test_dataframe_fdt(self):
+        df = pd.DataFrame({
+            "A": [1, "j", 2],
+            "B": [10, 20, 30],
+        })
+        fd = fdt(df)
+        assert isinstance(fd.columns["A"], CategoricalFDT)
+        assert isinstance(fd.columns["B"], NumericalFDT)
+
+    def test_ndarray_fdt(self):
+        df = pd.DataFrame({
+            "A": [1, "j", 2],
+            "B": [10, 20, 30],
+        })
+        fd = fdt(df)
+        assert isinstance(fd.columns["A"], CategoricalFDT)
+        assert isinstance(fd.columns["B"], NumericalFDT)

@@ -38,13 +38,10 @@ class NumericalFDT(FrequencyDistribution):
             right=right,
             na_rm=na_rm,
         )
-        self._fdt = result["table"]
+        self.table = result["table"]
 
         self.breaks_info = result["breaks"]
         """Information about the binning done in the creation of the FDT."""
-
-    def get_table(self) -> pd.DataFrame:
-        return self._fdt
 
     def mean(self) -> float:
         start = self.breaks_info["start"]
@@ -58,11 +55,10 @@ class NumericalFDT(FrequencyDistribution):
         mids = 0.5 * (breaks[:-1] + breaks[1:])
 
         # frequencies of each class
-        y = self._fdt[:, 1]
+        y = self.table[:, 1]
 
         # return the weighted mean of the midpoints
         return np.sum(y * mids) / np.sum(y)
-
 
     def median(self):
         raise NotImplementedError("TODO")
