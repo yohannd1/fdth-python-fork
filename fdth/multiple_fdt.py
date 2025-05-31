@@ -7,8 +7,12 @@ from .categorical_fdt import CategoricalFDT
 from .frequency_distribution import FrequencyDistribution
 
 class MultipleFDT:
+    """Contains FDTs of all columns in dataset."""
+
     def __init__(self, data: pd.DataFrame | np.ndarray, **kwargs) -> None:
         # TODO: doc
+        # TODO: arg for selecting only numeric or categorical columns (might use `df.select_dtypes(include=["category", "object"]).columns`)
+
         if isinstance(data, pd.DataFrame):
             self._data = data
         elif isinstance(data, np.ndarray):
