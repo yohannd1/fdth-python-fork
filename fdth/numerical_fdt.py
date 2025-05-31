@@ -73,6 +73,20 @@ class NumericalFDT(FrequencyDistribution):
         plt.ylabel("Frequência")
         plt.show()
 
+    def __repr__(self):
+        head_table = self.fdt.head().to_string(index=False)
+        return (
+            f"NumericalFDT\n"
+            f"-----------------------------\n"
+            f"Número de dados: {self.n}\n"
+            f"Número de classes (k): {self.k}\n"
+            f"Amplitude dos intervalos (h): {round(self.h, 4)}\n"
+            f"\n"
+            f"Tabela de Frequência (parcial):\n"
+            f"{head_table}\n"
+            f"...\n"
+            f"Use .get_table() para ver a tabela completa."
+        )
 
 #### LIMITES NÃO APROXIMADOS ####
 

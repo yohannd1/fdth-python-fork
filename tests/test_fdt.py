@@ -25,3 +25,4 @@ class Test(unittest.TestCase):
         data = [1, 5, "b"]
         fd = fdt(data)
         assert isinstance(fd, CategoricalFDT)
+        

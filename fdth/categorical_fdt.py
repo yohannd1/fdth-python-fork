@@ -151,3 +151,12 @@ class CategoricalFDT(FrequencyDistribution):
         return CategoricalFDT._make_table(
             df[column_name], sort=True, decreasing=True
         )
+    
+    def __repr__(self) -> str:
+        header = "CategoricalFDT\n"
+        header += f"Número de dados: {len(self.data)}\n"
+        header += f"Número de categorias: {self.data.nunique()}\n\n"
+
+        table_preview = self.get_table().to_string(index=False)
+
+        return header + "Tabela de Frequência:\n" + table_preview

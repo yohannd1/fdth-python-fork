@@ -20,6 +20,7 @@ def mean_fdt(x: Any) -> float:
     # Retornar a média
     return res
 
+# Teste de exemplo para a função mean_fdt
 
 """# Exemplo de entrada de teste para mean_fdt
 x_test = {
