@@ -12,7 +12,7 @@ class MultipleFDT:
         if isinstance(data, pd.DataFrame):
             self._data = data
         elif isinstance(data, np.ndarray):
-            raise NotImplementedError("TODO: handle np.ndarray")
+            self._data = pd.DataFrame(data)
         else:
             raise TypeError("data must be pandas.DataFrame | numpy.ndarray")
 

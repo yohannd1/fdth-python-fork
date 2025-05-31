@@ -43,4 +43,3 @@ x = np.array([
 df = pd.DataFrame(x, columns=["Col1", "Col2", "Col3"])
 res = fdt_cat_matrix(df, sort=True, decreasing=False)
 print(res)
-
