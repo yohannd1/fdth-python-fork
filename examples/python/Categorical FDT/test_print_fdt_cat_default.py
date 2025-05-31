@@ -11,7 +11,7 @@ categorias = [
     "Feminino", "Masculino", "Outro", "Outro", "Feminino"
 ] # fmt: skip
 
-tdf_categorias = fdt(categorias).get_table
+tdf_categorias = fdt(categorias).get_table()
 print(f"TDF Categorica 1\n")
 print_fdt_cat_default(tdf_categorias, columns = [0, 1, 3, 4], round=2, row_names=False, right=False)
 print()

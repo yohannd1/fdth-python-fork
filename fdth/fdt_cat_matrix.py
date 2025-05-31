@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
-from fdth.make_fdt_cat_simple import (
-    make_fdt_cat_simple,
-)  # Supondo que essa função já esteja implementada
-
+from fdth.make_fdt_cat_simple import make_fdt_cat_simple
 
 class FDTMatrixResult:
     """
