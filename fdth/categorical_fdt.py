@@ -99,3 +99,12 @@ class CategoricalFDT(FrequencyDistribution):
             "cf": cf.values,
             "cf(%)": cfp.values,
         })
+
+    def __repr__(self) -> str:
+        header = "CategoricalFDT\n"
+        header += f"Número de dados: {len(self._data)}\n"
+        header += f"Número de categorias: {self._data.nunique()}\n\n"
+
+        table_preview = self.get_table().to_string(index=False)
+
+        return header + "Tabela de Frequência:\n" + table_preview

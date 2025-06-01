@@ -1,4 +1,5 @@
 from typing import Literal, Sequence
+from dataclasses import dataclass
 
 import pandas as pd
 import numpy as np
@@ -7,6 +8,10 @@ import matplotlib.pyplot as plt
 from fdth import FrequencyDistribution
 
 NumericalBin = Literal["Sturges", "Scott", "FD"]
+
+
+@dataclass
+class BreaksInfo: ...
 
 
 class NumericalFDT(FrequencyDistribution):
@@ -27,6 +32,8 @@ class NumericalFDT(FrequencyDistribution):
             pass
         else:
             raise TypeError("Data must be a list, a pandas.Series or an numpy.ndarray")
+
+        self._data_size = len(data)
 
         result = _fdt_numeric_simple(
             data,
@@ -69,12 +76,32 @@ class NumericalFDT(FrequencyDistribution):
     def var(self):
         raise NotImplementedError("TODO")
 
+    def get_table(self):
+        # FIXME: deprecate in favor of `self.table`
+        return self.table
+
     def plot_histogram(self) -> None:
-        plt.hist(self.data, bins=self.bins, edgecolor="black")
+        # FIXME: whoops. I think I (yohanan) messed this up
+        plt.hist(self.table, bins=self.breaks_info["bins"], edgecolor="black")
         plt.title("Histograma")
         plt.xlabel("Valor")
         plt.ylabel("Frequência")
         plt.show()
+
+    def __repr__(self):
+        head_table = self.get_table().head().to_string(index=False)
+        return (
+            f"NumericalFDT\n"
+            f"-----------------------------\n"
+            f"Número de dados: {self._data_size}\n"
+            f"Número de classes (k): {self.breaks_info['k']}\n"
+            f"Amplitude dos intervalos (h): {round(self.breaks_info['h'], 4)}\n"
+            f"\n"
+            f"Tabela de Frequência (parcial):\n"
+            f"{head_table}\n"
+            f"...\n"
+            f"Use .get_table() para ver a tabela completa."
+        )
 
 
 def _fdt_numeric_simple(x, k, start, end, h, breaks, right, na_rm):
@@ -125,8 +152,15 @@ def _fdt_numeric_simple(x, k, start, end, h, breaks, right, na_rm):
         raise ValueError("Please check the function syntax!")
 
     # Generate the frequency distribution table
-    table = _make_fdt_simple(x, start, end, h, right)
-    breaks_info = {"start": start, "end": end, "h": h, "right": int(right)}
+    table, bins = _make_fdt_simple(x, start, end, h, right)
+    breaks_info = {
+        "start": start,
+        "end": end,
+        "h": h,
+        "k": k,
+        "right": int(right),
+        "bins": bins,
+    }
     result = {"table": table, "breaks": breaks_info}
 
     return result
@@ -170,4 +204,4 @@ def _make_fdt_simple(
 
     table.index = np.arange(1, len(table) + 1)
 
-    return table
+    return table, bins
