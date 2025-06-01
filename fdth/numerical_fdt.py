@@ -1,5 +1,6 @@
 from typing import Literal, Sequence
 from dataclasses import dataclass
+from functools import lru_cache
 
 import pandas as pd
 import numpy as np
@@ -11,7 +12,8 @@ NumericalBin = Literal["Sturges", "Scott", "FD"]
 
 
 @dataclass
-class BreaksInfo: ...
+class BreaksInfo:
+    pass
 
 
 class NumericalFDT(FrequencyDistribution):
@@ -50,7 +52,10 @@ class NumericalFDT(FrequencyDistribution):
         self.breaks_info = result["breaks"]
         """Information about the binning done in the creation of the FDT."""
 
+    @lru_cache(maxsize=1)
     def mean(self) -> float:
+        """Calculates an approximate of the mean of the data represented by the FDT."""
+
         start = self.breaks_info["start"]
         end = self.breaks_info["end"]
         h = self.breaks_info["h"]
@@ -62,19 +67,55 @@ class NumericalFDT(FrequencyDistribution):
         mids = 0.5 * (breaks[:-1] + breaks[1:])
 
         # frequencies of each class
-        y = self.table[:, 1]
+        y = self.table.loc[:, "f"]
 
         # return the weighted mean of the midpoints
         return np.sum(y * mids) / np.sum(y)
 
-    def median(self):
-        raise NotImplementedError("TODO")
+    @lru_cache(maxsize=1)
+    def median(self) -> float:
+        start = self.breaks_info["start"]
+        end = self.breaks_info["end"]
+        h = self.breaks_info["h"]
 
-    def mode(self):
-        raise NotImplementedError("TODO")
+        # Número total de observações
+        n = self.table.iloc[-1, 4]
 
+        # Posição da classe mediana
+        posM = (n / 2 <= self.table.iloc[:, 4]).idxmax()
+
+        brk = np.arange(start, end + h, h)
+
+        # Limite inferior da classe mediana
+        liM = brk[posM]
+
+        # Frequência acumulada anterior à classe mediana
+        if posM - 1 < 0:
+            sfaM = 0
+        else:
+            sfaM = self.table.iloc[posM - 1, 4]
+
+        # Frequência da classe mediana
+        fM = self.table.iloc[posM, 1]
+
+        return liM + (((n / 2) - sfaM) * h) / fM
+
+    @lru_cache(maxsize=1)
     def var(self):
-        raise NotImplementedError("TODO")
+        start = self.breaks_info["start"]
+        end = self.breaks_info["end"]
+        h = self.breaks_info["h"]
+
+        # Definir intervalos de classe com base nos valores 'start', 'end' e 'h'
+        breaks = np.arange(start, end + h, h)
+
+        # Calcular pontos médios dos intervalos de classe
+        mids = 0.5 * (breaks[:-1] + breaks[1:])
+
+        # Frequências das classes
+        y = self.table.loc[:, "f"]
+
+        return np.sum((mids - self.mean()) ** 2 * y) / (np.sum(y) - 1)
 
     def get_table(self):
         # FIXME: deprecate in favor of `self.table`
