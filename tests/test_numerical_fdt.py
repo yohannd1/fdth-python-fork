@@ -15,16 +15,16 @@ def test_numerical_fdt():
     assert not table.empty
 
     # Média
-    # mean_value = fd.mean()
-    # assert isinstance(mean_value, float)
+    mean_value = fd.mean()
+    assert isinstance(mean_value, float)
 
     # Mediana
-    # median_value = fd.median()
-    # assert isinstance(median_value, float)
+    median_value = fd.median()
+    assert isinstance(median_value, float)
 
     # Variância
-    # var_value = fd.var()
-    # assert isinstance(var_value, float)
+    var_value = fd.var()
+    assert isinstance(var_value, float)
 
     # Histograma
     _ = fd.plot_histogram()

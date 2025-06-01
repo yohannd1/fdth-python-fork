@@ -9,6 +9,7 @@ from .numerical_fdt import NumericalFDT, NumericalBin
 from .categorical_fdt import CategoricalFDT
 from .multiple_fdt import MultipleFDT
 
+
 def fdt(
     data: pd.Series | list | pd.DataFrame | np.ndarray,
     **kwargs,
@@ -49,7 +50,9 @@ def fdt(
     elif isinstance(data, pd.DataFrame | np.ndarray):
         return MultipleFDT(data)
     else:
-        raise TypeError("data must be list | pandas.Series | pandas.DataFrame | numpy.ndarray")
+        raise TypeError(
+            "data must be list | pandas.Series | pandas.DataFrame | numpy.ndarray"
+        )
 
     kind = deduce_fdt_kind(data)
     if kind == "categorical":

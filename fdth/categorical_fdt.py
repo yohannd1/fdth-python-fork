@@ -25,10 +25,14 @@ class CategoricalFDT(FrequencyDistribution):
         elif isinstance(data, pd.Series):
             self._data = data
         else:
-            raise TypeError("data must be list | pandas.Series | pandas.DataFrame | numpy.ndarray")
+            raise TypeError(
+                "data must be list | pandas.Series | pandas.DataFrame | numpy.ndarray"
+            )
 
         self._data = self._data.astype("category")
-        self.table = self._make_single_table(self._data, sort=sort, decreasing=decreasing)
+        self.table = self._make_single_table(
+            self._data, sort=sort, decreasing=decreasing
+        )
 
     def get_table(self) -> pd.DataFrame:
         # FIXME: deprecate this (in favor of `self.table`)
@@ -54,7 +58,9 @@ class CategoricalFDT(FrequencyDistribution):
         return self._data.mode().iloc[0]
 
     @staticmethod
-    def _make_single_table(data: pd.Series, sort: bool, decreasing: bool) -> pd.DataFrame:
+    def _make_single_table(
+        data: pd.Series, sort: bool, decreasing: bool
+    ) -> pd.DataFrame:
         """
         Creates a frequency distribution table (FDT) for a set of categorical data.
 
@@ -98,7 +104,7 @@ class CategoricalFDT(FrequencyDistribution):
             "rf(%)": rfp.values,
             "cf": cf.values,
             "cf(%)": cfp.values,
-        })
+        }) # fmt: skip
 
     def __repr__(self) -> str:
         header = "CategoricalFDT\n"

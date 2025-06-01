@@ -1,27 +1,14 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 import pandas as pd
 import numpy as np
 
-class FrequencyDistribution:
+
+class FrequencyDistribution(ABC):
+    """Stores frequency distribution data for some dataset."""
+
     @abstractmethod
     def get_table(self) -> pd.DataFrame: ...
-
-    @abstractmethod
-    def mean(self): ...
-
-    @abstractmethod
-    def mode(self):
-        """
-        Calcula a moda (valor mais frequente) dos dados.
-        """
-        pass
-
-    @abstractmethod
-    def median(self): ...
-
-    @abstractmethod
-    def var(self): ...
 
     @abstractmethod
     def plot_histogram(self) -> None: ...
