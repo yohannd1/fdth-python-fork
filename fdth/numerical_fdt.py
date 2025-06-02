@@ -74,6 +74,8 @@ class NumericalFDT(FrequencyDistribution):
 
     @lru_cache(maxsize=1)
     def median(self) -> float:
+        """Calculates the median."""
+
         start = self.breaks_info["start"]
         end = self.breaks_info["end"]
         h = self.breaks_info["h"]
@@ -102,6 +104,8 @@ class NumericalFDT(FrequencyDistribution):
 
     @lru_cache(maxsize=1)
     def var(self):
+        """Calculates the variance."""
+
         start = self.breaks_info["start"]
         end = self.breaks_info["end"]
         h = self.breaks_info["h"]
@@ -116,6 +120,11 @@ class NumericalFDT(FrequencyDistribution):
         y = self.table.loc[:, "f"]
 
         return np.sum((mids - self.mean()) ** 2 * y) / (np.sum(y) - 1)
+
+    @lru_cache(maxsize=1)
+    def sd(self) -> float:
+        """Calculates the standard deviation (square root of the variance)."""
+        return np.sqrt(self.var())
 
     def get_table(self):
         # FIXME: deprecate in favor of `self.table`

@@ -47,7 +47,12 @@ def fdt(
         data = pd.Series(data)
     elif isinstance(data, pd.Series):
         pass
-    elif isinstance(data, pd.DataFrame | np.ndarray):
+    elif isinstance(data, np.ndarray):
+        if data.ndim == 1:
+            data = pd.Series(data)
+        else:
+            return MultipleFDT(data)
+    elif isinstance(data, pd.DataFrame):
         return MultipleFDT(data)
     else:
         raise TypeError(
