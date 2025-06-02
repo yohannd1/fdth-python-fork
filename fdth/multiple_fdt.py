@@ -35,3 +35,9 @@ class MultipleFDT:
             return NumericalFDT(data, **kwargs)
         else:
             raise TypeError(f"unexpected kind: {repr(kind)}")
+
+    def __repr__(self) -> str:
+        res = f"MultipleFDT ({len(self.fdts)} tables):\n\n"
+        for k, v in self.fdts.items():
+            res += f"{k}: {v}\n\n"
+        return res
