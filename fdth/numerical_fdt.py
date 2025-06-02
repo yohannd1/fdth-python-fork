@@ -139,20 +139,9 @@ class NumericalFDT(FrequencyDistribution):
         plt.show()
 
     def __repr__(self):
-        head_table = self.get_table().head().to_string(index=False)
-        return (
-            f"NumericalFDT\n"
-            f"-----------------------------\n"
-            f"Número de dados: {self._data_size}\n"
-            f"Número de classes (k): {self.breaks_info['k']}\n"
-            f"Amplitude dos intervalos (h): {round(self.breaks_info['h'], 4)}\n"
-            f"\n"
-            f"Tabela de Frequência (parcial):\n"
-            f"{head_table}\n"
-            f"...\n"
-            f"Use .get_table() para ver a tabela completa."
-        )
-
+        res = f"NumericalFDT (size {self._data_size}, class count {self.breaks_info['k']}, amplitude {round(self.breaks_info['h'], 4)}), head:\n"
+        res += self.table.head().to_string(index=False)
+        return res
 
 def _fdt_numeric_simple(x, k, start, end, h, breaks, right, na_rm):
     x = np.array([np.nan if v is None else v for v in x], dtype=np.float64)

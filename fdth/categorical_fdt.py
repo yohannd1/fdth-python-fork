@@ -107,10 +107,6 @@ class CategoricalFDT(FrequencyDistribution):
         }) # fmt: skip
 
     def __repr__(self) -> str:
-        header = "CategoricalFDT\n"
-        header += f"Número de dados: {len(self._data)}\n"
-        header += f"Número de categorias: {self._data.nunique()}\n\n"
-
-        table_preview = self.get_table().to_string(index=False)
-
-        return header + "Tabela de Frequência:\n" + table_preview
+        res = f"CategoricalFDT (size {len(self._data)}, category count {self._data.nunique()}), head:\n"
+        res += self.table.head().to_string(index=False)
+        return res
