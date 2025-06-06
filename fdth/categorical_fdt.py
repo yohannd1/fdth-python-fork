@@ -1,4 +1,5 @@
 from typing import Optional, Any
+from functools import lru_cache
 
 import pandas as pd
 import numpy as np
@@ -58,8 +59,10 @@ class CategoricalFDT(FrequencyDistribution):
 
         plt.show()
 
-    def mfv(self) -> Any:
-        return self._data.mode().iloc[0]
+    @lru_cache(maxsize=1)
+    def mfv(self) -> pd.Series:
+        """Returns the most frequent values (modes) of the data set."""
+        return self._data.mode().iloc[0:]
 
     @staticmethod
     def _make_single_table(

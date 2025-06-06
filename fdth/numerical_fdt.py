@@ -31,16 +31,16 @@ class NumericalFDT(FrequencyDistribution):
         na_rm: bool = False,
     ):
         if isinstance(data, (list, np.ndarray)):
-            data = pd.Series(data)
+            self._data = pd.Series(data)
         elif isinstance(data, pd.Series):
-            pass
+            self._data = data
         else:
             raise TypeError("Data must be a list, a pandas.Series or an numpy.ndarray")
 
-        self._data_size = len(data)
+        self._data_size = len(self._data)
 
         result = _fdt_numeric_simple(
-            data,
+            self._data,
             k=k,
             start=start,
             end=end,
@@ -130,7 +130,10 @@ class NumericalFDT(FrequencyDistribution):
         """Calculates the standard deviation (square root of the variance)."""
         return np.sqrt(self.var())
 
-    # TODO: mfv
+    @lru_cache(maxsize=1)
+    def mfv(self) -> pd.Series:
+        """Returns the most frequent values (modes) of the data set."""
+        return self._data.mode()
 
     def get_table(self):
         # FIXME: deprecate in favor of `self.table`
