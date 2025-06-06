@@ -15,14 +15,14 @@ class Test(unittest.TestCase):
         _ = fd.mean()
         _ = fd.median()
         _ = fd.var()
-        _ = fd.plot_histogram()
+        fd.plot_histogram()
 
     def test_categorical_fdt(self):
         data = ["a", "b", "a", "c", "c"]
         fd = fdt(data)
         assert isinstance(fd, CategoricalFDT)
         _ = fd.get_table()
-        _ = fd.plot_histogram()
+        fd.plot_histogram()
 
     def test_categorical_fdt_mixed(self):
         data = [1, 5, "b"]

@@ -57,8 +57,6 @@ class CategoricalFDT(FrequencyDistribution):
         # rotacionar os rótulos das categorias para ficarem legíveis
         plt.xticks(rotation=0)
 
-        plt.show()
-
     @lru_cache(maxsize=1)
     def mfv(self) -> pd.Series:
         """Returns the most frequent values (modes) of the data set."""

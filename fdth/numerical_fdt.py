@@ -145,7 +145,6 @@ class NumericalFDT(FrequencyDistribution):
         plt.title("Histograma")
         plt.xlabel("Valor")
         plt.ylabel("Frequência")
-        plt.show()
 
     def __repr__(self):
         res = f"NumericalFDT (size {self._data_size}, class count {self.breaks_info['k']}, amplitude {round(self.breaks_info['h'], 4)}), head:\n"

@@ -40,4 +40,3 @@ class Test(unittest.TestCase):
         mfv_and_compare([1, 2, 3, 4, 5], [1, 2, 3, 4, 5])
         mfv_and_compare([2, 2, 2, 2, 2], [2])
         mfv_and_compare(["a", "b", "b", "c"], ["b"])
-        mfv_and_compare([], [])

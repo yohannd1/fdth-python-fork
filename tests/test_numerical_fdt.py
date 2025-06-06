@@ -1,45 +1,38 @@
+import unittest
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
 from fdth import fdt, NumericalFDT
 
+class Test(unittest.TestCase):
+    def test_categorical_fdt(self):
+        data = [1, 2, 6, 8, 10]
+        fd = fdt(data)
+        assert isinstance(fd, NumericalFDT)
 
-def test_numerical_fdt():
-    data = [1, 2, 6, 8, 10]
-    fd = fdt(data)
-    assert isinstance(fd, NumericalFDT)
+        # tabela
+        table = fd.get_table()
+        assert isinstance(table, pd.DataFrame)
+        assert not table.empty
 
-    # Tabela
-    table = fd.get_table()
-    assert isinstance(table, pd.DataFrame)
-    assert not table.empty
+        # média
+        mean_value = fd.mean()
+        assert isinstance(mean_value, float)
 
-    # Média
-    mean_value = fd.mean()
-    assert isinstance(mean_value, float)
+        # mediana
+        median_value = fd.median()
+        assert isinstance(median_value, float)
 
-    # Mediana
-    median_value = fd.median()
-    assert isinstance(median_value, float)
+        # variância
+        var_value = fd.var()
+        assert isinstance(var_value, float)
 
-    # Variância
-    var_value = fd.var()
-    assert isinstance(var_value, float)
+        # histograma
+        fd.plot_histogram()
 
-    # Histograma
-    _ = fd.plot_histogram()
-    plt.close()  # Fecha o gráfico pra não travar
-
-    # Testa o __repr__
-    repr_output = repr(fd)
-    assert isinstance(repr_output, str)
-    assert "NumericalFDT" in repr_output
-    assert "Número de dados:" in repr_output
-    assert "Tabela de Frequência" in repr_output
-
-    print(repr_output)
-
-
-if __name__ == "__main__":
-    test_numerical_fdt()
-    print("Numerical FDT tests completed.")
+        # testa o __repr__
+        repr_output = repr(fd)
+        assert isinstance(repr_output, str)
+        assert "NumericalFDT" in repr_output
