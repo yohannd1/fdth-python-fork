@@ -17,6 +17,8 @@ class BreaksInfo:
 
 
 class NumericalFDT(FrequencyDistribution):
+    """Stores information about a numerical frequency distribution, and allows related operations."""
+
     def __init__(
         self,
         data: pd.Series | list | np.ndarray,
@@ -47,14 +49,16 @@ class NumericalFDT(FrequencyDistribution):
             right=right,
             na_rm=na_rm,
         )
+
         self.table = result["table"]
+        """The inner frequency distribution table."""
 
         self.breaks_info = result["breaks"]
         """Information about the binning done in the creation of the FDT."""
 
     @lru_cache(maxsize=1)
     def mean(self) -> float:
-        """Calculates an approximate of the mean of the data represented by the FDT."""
+        """Calculate an approximate of the mean of the data represented by the FDT."""
 
         start = self.breaks_info["start"]
         end = self.breaks_info["end"]
@@ -74,7 +78,7 @@ class NumericalFDT(FrequencyDistribution):
 
     @lru_cache(maxsize=1)
     def median(self) -> float:
-        """Calculates the median."""
+        """Calculate an approximate of the median (50th percentile) of the data represented by the FDT."""
 
         start = self.breaks_info["start"]
         end = self.breaks_info["end"]
@@ -103,8 +107,8 @@ class NumericalFDT(FrequencyDistribution):
         return liM + (((n / 2) - sfaM) * h) / fM
 
     @lru_cache(maxsize=1)
-    def var(self):
-        """Calculates the variance."""
+    def var(self) -> float:
+        """Calculate an approximate of the variance of the data represented by the FDT."""
 
         start = self.breaks_info["start"]
         end = self.breaks_info["end"]
@@ -125,6 +129,8 @@ class NumericalFDT(FrequencyDistribution):
     def sd(self) -> float:
         """Calculates the standard deviation (square root of the variance)."""
         return np.sqrt(self.var())
+
+    # TODO: mfv
 
     def get_table(self):
         # FIXME: deprecate in favor of `self.table`

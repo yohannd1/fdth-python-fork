@@ -8,6 +8,8 @@ from fdth import FrequencyDistribution
 
 
 class CategoricalFDT(FrequencyDistribution):
+    """Stores information about a categorical frequency distribution, and allows related operations."""
+
     def __init__(
         self,
         data: pd.Series | list,
@@ -30,9 +32,11 @@ class CategoricalFDT(FrequencyDistribution):
             )
 
         self._data = self._data.astype("category")
+
         self.table = self._make_single_table(
             self._data, sort=sort, decreasing=decreasing
         )
+        """The inner frequency distribution table."""
 
     def get_table(self) -> pd.DataFrame:
         # FIXME: deprecate this (in favor of `self.table`)
@@ -54,7 +58,7 @@ class CategoricalFDT(FrequencyDistribution):
 
         plt.show()
 
-    def mode(self):
+    def mfv(self) -> Any:
         return self._data.mode().iloc[0]
 
     @staticmethod
