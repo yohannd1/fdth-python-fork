@@ -29,3 +29,15 @@ class Test(unittest.TestCase):
         data = np.array([1, 5, 3, 2, 1, 8])
         fd = fdt(data)
         self.assertClose(np.median(data), fd.median(), atol=0.4)
+
+    def test_mfv(self):
+        def mfv_and_compare(data, expected_mfv) -> None:
+            calculated_mfv = fdt(data).mfv()
+            assert all(calculated_mfv == expected_mfv)
+
+        mfv_and_compare([1, 2, 2, 3, 4], [2])
+        mfv_and_compare([1, 1, 2, 2, 3], [1, 2])
+        mfv_and_compare([1, 2, 3, 4, 5], [1, 2, 3, 4, 5])
+        mfv_and_compare([2, 2, 2, 2, 2], [2])
+        mfv_and_compare(["a", "b", "b", "c"], ["b"])
+        mfv_and_compare([], [])
