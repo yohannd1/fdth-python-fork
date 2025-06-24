@@ -150,6 +150,23 @@ class NumericalFDT(FrequencyDistribution):
         res = f"NumericalFDT (size {self._data_size}, class count {self.breaks_info['k']}, amplitude {round(self.breaks_info['h'], 4)}), head:\n"
         res += self.table.head().to_string(index=False)
         return res
+    
+    def to_string(
+        self,
+        columns=range(6),
+        round=2,
+        row_names=False,
+        right=True,
+        **kwargs
+    ) -> str:
+        df = self.table
+        res = pd.concat([df.iloc[:, [0]], df.iloc[:, 1:6].round(round)], axis=1)
+        res = res.iloc[:, columns]
+
+        col_names = ['Class', 'f', 'rf', 'rf(%)', 'cf', 'cf(%)']
+        res.columns = [col_names[i] for i in columns]
+
+        return res.to_string(index=row_names, justify='right' if right else 'left', **kwargs)
 
 def _fdt_numeric_simple(x, k, start, end, h, breaks, right, na_rm):
     x = np.array([np.nan if v is None else v for v in x], dtype=np.float64)
