@@ -12,6 +12,7 @@ from .multiple_fdt import MultipleFDT
 
 def fdt(
     data: pd.Series | list | pd.DataFrame | np.ndarray,
+    kind: Literal["numerical", "categorical", None] = None,
     **kwargs,
     # sort: bool = True,
     # decreasing: bool = True,
@@ -59,7 +60,7 @@ def fdt(
             "data must be list | pandas.Series | pandas.DataFrame | numpy.ndarray"
         )
 
-    kind = deduce_fdt_kind(data)
+    kind = kind or deduce_fdt_kind(data)
     if kind == "categorical":
         return CategoricalFDT(data, **kwargs)
     elif kind == "numerical":
