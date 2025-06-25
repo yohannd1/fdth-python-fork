@@ -146,27 +146,38 @@ class NumericalFDT(FrequencyDistribution):
         plt.xlabel("Valor")
         plt.ylabel("Frequência")
 
-    def __repr__(self):
-        res = f"NumericalFDT (size {self._data_size}, class count {self.breaks_info['k']}, amplitude {round(self.breaks_info['h'], 4)}), head:\n"
-        res += self.table.head().to_string(index=False)
-        return res
-    
     def to_string(
         self,
-        columns=range(6),
-        round=2,
-        row_names=False,
-        right=True,
-        **kwargs
+        columns: list[str] | None = None,
+        round: int = 2,
+        right: bool = True,
+        row_numbers: bool = False,
+        max_lines: int | None = None,
     ) -> str:
-        df = self.table
-        res = pd.concat([df.iloc[:, [0]], df.iloc[:, 1:6].round(round)], axis=1)
-        res = res.iloc[:, columns]
+        table = self.table
 
-        col_names = ['Class', 'f', 'rf', 'rf(%)', 'cf', 'cf(%)']
-        res.columns = [col_names[i] for i in columns]
+        if max_lines is not None:
+            table = table.head(max_lines)
 
-        return res.to_string(index=row_names, justify='right' if right else 'left', **kwargs)
+        # filter by columns if any were specified
+        if columns is not None:
+            table = pd.concat([table["Class limits"], table[columns]], axis="columns")
+
+        # round the numbers in the table
+        table = table.round(round)
+
+        return table.to_string(index=row_numbers, justify="right" if right else "left")
+
+    def __repr__(self) -> str:
+        count = self._data_size
+
+        res = f"NumericalFDT ({count} elements, {self.breaks_info['k']} classes, amplitude of {self.breaks_info['h']:.2f}):\n"
+        res += self.to_string(max_lines=5) + "\n"
+        if count > 5:
+            res += f"... {count-5} more lines"
+
+        return res
+
 
 def _fdt_numeric_simple(x, k, start, end, h, breaks, right, na_rm):
     x = np.array([np.nan if v is None else v for v in x], dtype=np.float64)

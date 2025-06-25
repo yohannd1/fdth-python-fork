@@ -1,6 +1,11 @@
 import pandas as pd
 import re
 
+# TODO(Yohanan): remove this file. I think it's not needed because the
+# intervals are guaranteed to be properly formatted, I believe. When creating
+# them from direct FDT data, though, it might be needed. In that case, I think
+# the checking should be done before creating the table class.
+
 
 def format_interval(vals, right, pattern):
     # Checks for two valid elements in the range
