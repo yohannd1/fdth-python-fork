@@ -8,14 +8,13 @@ from fdth import CategoricalFDT
 
 class Test(unittest.TestCase):
     def test_categorical_fdt(self):
-        data = ["Azul", "Vermelho", "Azul", "Verde", "Azul", "Vermelho"]
+        data = ["Blue", "Red", "Blue", "Green", "Blue", "Red"]
         fd = CategoricalFDT(data)
         assert isinstance(fd, CategoricalFDT)
 
         # tabela
-        table = fd.get_table()
-        assert isinstance(table, pd.DataFrame)
-        assert not table.empty
+        assert isinstance(fd.table, pd.DataFrame)
+        assert not fd.table.empty
 
         # plotar histograma
         fd.plot_histogram()
@@ -24,3 +23,9 @@ class Test(unittest.TestCase):
         repr_output = repr(fd)
         assert isinstance(repr_output, str)
         assert "CategoricalFDT" in repr_output
+
+    def test_data_and_freqs(self):
+        data = ["Blue", "Red", "Blue", "Green", "Blue", "Red"]
+        fd_1 = CategoricalFDT(data)
+        fd_2 = CategoricalFDT(freqs={"Blue": 3, "Red": 2, "Green": 1})
+        self.assertEqual(fd_1.to_string(), fd_2.to_string())
