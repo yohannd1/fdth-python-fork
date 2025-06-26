@@ -3,6 +3,7 @@ from typing import TypeVar, Optional, Sequence, Any
 
 T = TypeVar("T")
 
+
 def mfv_default(x: Sequence[T], **kwargs: Any) -> Optional[T]:
     # Se o conjunto de dados estiver vazio, retorne None
     if len(x) == 0:

@@ -2,6 +2,7 @@
 
 ## TIPO I ##
 
+
 class NumericalFDT(FrequencyDistribution):
     def __init__(
         self,
@@ -84,6 +85,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 class NumericalFDT:
     def __init__(self, data):
         """
@@ -93,7 +95,9 @@ class NumericalFDT:
             raise ValueError("Dados devem ser uma lista ou uma Series do pandas.")
 
         self.data = pd.Series(data) if isinstance(data, list) else data
-        self.data = pd.to_numeric(self.data, errors="coerce")  # Convertendo para numérico
+        self.data = pd.to_numeric(
+            self.data, errors="coerce"
+        )  # Convertendo para numérico
 
         self.breaks = self._define_breaks()
         self.table = self._build_fdt_table()
@@ -103,12 +107,7 @@ class NumericalFDT:
         Define os limites dos intervalos automaticamente com base nos dados.
         """
         bins = np.histogram_bin_edges(self.data, bins="auto")
-        return {
-            "start": bins[0],
-            "end": bins[-1],
-            "h": bins[1] - bins[0],
-            "bins": bins
-        }
+        return {"start": bins[0], "end": bins[-1], "h": bins[1] - bins[0], "bins": bins}
 
     def _build_fdt_table(self):
         """
@@ -119,11 +118,9 @@ class NumericalFDT:
         cum_freq = np.cumsum(freq)
         intervals = list(zip(breaks[:-1], breaks[1:]))
 
-        return pd.DataFrame({
-            "Interval": intervals,
-            "Frequency": freq,
-            "Cumulative Frequency": cum_freq
-        })
+        return pd.DataFrame(
+            {"Interval": intervals, "Frequency": freq, "Cumulative Frequency": cum_freq}
+        )
 
     def make_fdt(self):
         """

@@ -46,7 +46,7 @@ class CategoricalFDT(FrequencyDistribution):
             if isinstance(data, list):
                 data = pd.Series(data)
             elif isinstance(data, pd.Series):
-                data = data
+                pass
             else:
                 raise TypeError("`data` must be list | pandas.Series")
 

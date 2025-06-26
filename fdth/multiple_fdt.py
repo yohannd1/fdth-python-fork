@@ -6,8 +6,9 @@ from .numerical_fdt import NumericalFDT
 from .categorical_fdt import CategoricalFDT
 from .frequency_distribution import FrequencyDistribution
 
+
 class MultipleFDT:
-    """Contains FDTs of all columns in dataset."""
+    """Contains FDTs of all columns in a data set (table or matrix)."""
 
     def __init__(self, data: pd.DataFrame | np.ndarray, **kwargs) -> None:
         # TODO: doc
