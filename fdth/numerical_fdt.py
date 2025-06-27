@@ -163,8 +163,28 @@ class NumericalFDT(FrequencyDistribution):
 
     @lru_cache(maxsize=1)
     def mfv(self) -> pd.Series:
-        """Returns the most frequent values (modes) of the data set."""
-        raise NotImplementedError("TODO")
+        """Returns an approximation of the most frequent values (modes) of the data set."""
+
+        freqs = self.table["f"].values
+        bins = self.breaks_info.bins
+        h = self.breaks_info.h
+
+        # Czuber's formula
+        def calculate_mfv(pos: int) -> float:
+            lower_limit = bins[pos]
+            num_rows = len(freqs)
+
+            current_freq = float(freqs[pos])
+            preceding_freq = float(0 if pos - 1 < 0 else freqs[pos - 1])
+            succeeding_freq = float(0 if pos + 1 >= num_rows else freqs[pos + 1])
+
+            d1 = current_freq - preceding_freq
+            d2 = current_freq - succeeding_freq
+
+            return float(lower_limit + (d1 / (d1 + d2)) * h)
+
+        positions = np.where(freqs == freqs.max())
+        return pd.Series(calculate_mfv(pos) for pos in positions)
 
     def get_table(self) -> pd.DataFrame:
         return self.table
