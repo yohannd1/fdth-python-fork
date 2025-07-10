@@ -24,7 +24,7 @@ class MultipleFDT:
         self.fdts = {k: self._auto_fdt(v, **kwargs) for (k, v) in self._data.items()}
         """A dictionary with the individual FDT objects for each column."""
 
-        self.tables = {k: v.table for (k, v) in self.fdts.items()}
+        self.tables = {k: v.get_table() for (k, v) in self.fdts.items()}
         """A dictionary with the individual tables for each column, skipping the classes."""
 
     @staticmethod

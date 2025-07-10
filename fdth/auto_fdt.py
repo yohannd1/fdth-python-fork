@@ -44,13 +44,16 @@ def fdt(
 
     :return: a DataFrame containing the frequency distribution table.
     """
+
+    data_series: pd.Series
+
     if isinstance(data, list):
-        data = pd.Series(data)
+        data_series = pd.Series(data)
     elif isinstance(data, pd.Series):
-        pass
+        data_series = data
     elif isinstance(data, np.ndarray):
         if data.ndim == 1:
-            data = pd.Series(data)
+            data_series = pd.Series(data)
         else:
             return MultipleFDT(data)
     elif isinstance(data, pd.DataFrame):
@@ -60,10 +63,10 @@ def fdt(
             "data must be list | pandas.Series | pandas.DataFrame | numpy.ndarray"
         )
 
-    kind = kind or deduce_fdt_kind(data)
+    kind = kind or deduce_fdt_kind(data_series)
     if kind == "categorical":
-        return CategoricalFDT(data, **kwargs)
+        return CategoricalFDT(data_series, **kwargs)
     elif kind == "numerical":
-        return NumericalFDT(data, **kwargs)
+        return NumericalFDT(data_series, **kwargs)
     else:
         raise TypeError(f"unexpected kind: {repr(kind)}")

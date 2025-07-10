@@ -18,7 +18,7 @@ class BreaksInfo:
     h: float
     k: int
     right: bool
-    bins: np.array
+    bins: np.ndarray
 
 
 class NumericalFDT(FrequencyDistribution):
