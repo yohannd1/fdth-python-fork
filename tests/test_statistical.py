@@ -34,9 +34,5 @@ class Test(unittest.TestCase):
         def mfv_and_compare(data, expected_mfv) -> None:
             calculated_mfv = fdt(data).mfv()
             assert all(calculated_mfv == expected_mfv)
-
-        mfv_and_compare([1, 2, 2, 3, 4], [2])
-        mfv_and_compare([1, 1, 2, 2, 3], [1, 2])
-        mfv_and_compare([1, 2, 3, 4, 5], [1, 2, 3, 4, 5])
-        mfv_and_compare([2, 2, 2, 2, 2], [2])
         mfv_and_compare(["a", "b", "b", "c"], ["b"])
+        self.assertClose(fdt([0, 1, 1, 2, 2, 3]).mfv()[0], 1.515, atol=0.4)

@@ -87,7 +87,7 @@ class NumericalFDT(FrequencyDistribution):
         else:
             raise ValueError("one of `data` or `table` must be specified")
 
-    @lru_cache(maxsize=1)
+    @lru_cache
     def mean(self) -> float:
         """Calculate an approximate of the mean of the data represented by the FDT."""
 
@@ -107,7 +107,12 @@ class NumericalFDT(FrequencyDistribution):
         # return the weighted mean of the midpoints
         return np.sum(y * midpoints) / np.sum(y)
 
-    @lru_cache(maxsize=1)
+    @lru_cache
+    def at(self) -> float:
+        """Calculate the total amplitude of the data (estimate)."""
+        raise NotImplementedError("TODO")
+
+    @lru_cache
     def median(self) -> float:
         """Calculate an approximate of the median (50th percentile) of the data represented by the FDT."""
 
@@ -137,7 +142,7 @@ class NumericalFDT(FrequencyDistribution):
 
         return liM + (((n / 2) - sfaM) * h) / fM
 
-    @lru_cache(maxsize=1)
+    @lru_cache
     def var(self) -> float:
         """Calculate an approximate of the variance of the data represented by the FDT."""
 
@@ -156,12 +161,12 @@ class NumericalFDT(FrequencyDistribution):
 
         return np.sum((midpoints - self.mean()) ** 2 * y) / (np.sum(y) - 1)
 
-    @lru_cache(maxsize=1)
+    @lru_cache
     def sd(self) -> float:
         """Calculates the standard deviation (square root of the variance)."""
         return np.sqrt(self.var())
 
-    @lru_cache(maxsize=1)
+    @lru_cache
     def mfv(self) -> pd.Series:
         """Returns an approximation of the most frequent values (modes) of the data set."""
 
@@ -183,7 +188,7 @@ class NumericalFDT(FrequencyDistribution):
 
             return float(lower_limit + (d1 / (d1 + d2)) * h)
 
-        positions = np.where(freqs == freqs.max())
+        positions = np.where(freqs == freqs.max())[0]
         return pd.Series(calculate_mfv(pos) for pos in positions)
 
     def get_table(self) -> pd.DataFrame:
