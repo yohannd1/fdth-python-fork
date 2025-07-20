@@ -1,5 +1,5 @@
 import pandas as pd
-from fdth.fdt_cat_data_fram import fdt_cat_data_frame  # Ensure the function and class are in the same directory
+from fdth import fdt  
 
 
 # Test 1: Sem agrupamento
@@ -10,7 +10,7 @@ df1 = pd.DataFrame({
     'col1': pd.Categorical(['A', 'B', 'A', 'C', 'C']),
     'col2': pd.Categorical(['X', 'X', 'Y', 'X', 'Y'])
 })
-result1 = fdt_cat_data_frame(df1, sort=True, decreasing=True)
+result1 = fdt(df1, sort=True, decreasing=True)
 print(result1)
 
 """

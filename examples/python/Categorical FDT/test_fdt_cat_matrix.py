@@ -1,4 +1,4 @@
-from fdth.fdt_cat_matrix import fdt_cat_matrix
+from fdth import fdt
 import numpy as np
 import pandas as pd
 """
@@ -41,5 +41,5 @@ x = np.array([
     ["Fish", "Dog", "Bird"]
 ])
 df = pd.DataFrame(x, columns=["Col1", "Col2", "Col3"])
-res = fdt_cat_matrix(df, sort=True, decreasing=False)
+res = fdt(df, sort=True, decreasing=False)
 print(res)
