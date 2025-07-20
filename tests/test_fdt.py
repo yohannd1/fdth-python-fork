@@ -45,8 +45,8 @@ class Test(unittest.TestCase):
             "B": [10, 20, 30],
         }) # fmt: skip
         fd = fdt(df)
-        assert isinstance(fd.fdts["A"], CategoricalFDT)
-        assert isinstance(fd.fdts["B"], NumericalFDT)
+        assert isinstance(fd.get_fdt("A"), CategoricalFDT)
+        assert isinstance(fd.get_fdt("B"), NumericalFDT)
 
     def test_ndarray_fdt(self):
         x = np.array([
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
         ]) # fmt: skip
         fd = fdt(x)
 
-        assert len(fd.fdts) == 3
-        assert isinstance(fd.fdts[0], CategoricalFDT)
-        assert isinstance(fd.fdts[1], CategoricalFDT)
-        assert isinstance(fd.fdts[2], CategoricalFDT)
+        assert len(fd.fdts_by_index) == 3
+        assert isinstance(fd.get_fdt(0), CategoricalFDT)
+        assert isinstance(fd.get_fdt(1), CategoricalFDT)
+        assert isinstance(fd.get_fdt(2), CategoricalFDT)

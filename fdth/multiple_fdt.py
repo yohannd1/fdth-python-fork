@@ -1,3 +1,5 @@
+from typing import Optional, Any
+
 import pandas as pd
 import numpy as np
 
@@ -21,11 +23,24 @@ class MultipleFDT:
         else:
             raise TypeError("data must be pandas.DataFrame | numpy.ndarray")
 
-        self.fdts = {k: self._auto_fdt(v, **kwargs) for (k, v) in self._data.items()}
+        self.fdts_by_column = {k: self._auto_fdt(v, **kwargs) for (k, v) in self._data.items()}
         """A dictionary with the individual FDT objects for each column."""
 
-        self.tables = {k: v.get_table() for (k, v) in self.fdts.items()}
-        """A dictionary with the individual tables for each column, skipping the classes."""
+        self.fdts_by_index = [self.fdts_by_column[k] for (k, _) in self._data.items()]
+        """A list with the individual FDT objects for each column index."""
+
+    def get_fdt(self, column: Any = None, index: Optional[int] = None) -> FrequencyDistribution:
+        if column is not None and index is not None:
+            raise ValueError("both `column` and `index` were specified - specify exactly one")
+        elif column is not None:
+            return self.fdts_by_column[column]
+        elif index is not None:
+            return self.fdts_by_index[index]
+        else:
+            raise ValueError("neither `column` nor `index` were specified - specify exactly one")
+
+    def get_table(self, column: Any = None, index: Optional[int] = None) -> pd.DataFrame:
+        return self.get_fdt(column, index).get_table()
 
     @staticmethod
     def _auto_fdt(data: pd.Series, **kwargs) -> FrequencyDistribution:
@@ -39,6 +54,6 @@ class MultipleFDT:
 
     def __repr__(self) -> str:
         res = f"MultipleFDT ({len(self.fdts)} tables):\n\n"
-        for k, v in self.fdts.items():
+        for k, v in self.fdts_by_column.items():
             res += f"{k}: {v}\n\n"
         return res
