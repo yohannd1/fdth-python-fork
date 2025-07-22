@@ -36,3 +36,8 @@ class Test(unittest.TestCase):
             assert all(calculated_mfv == expected_mfv)
         mfv_and_compare(["a", "b", "b", "c"], ["b"])
         self.assertClose(fdt([0, 1, 1, 2, 2, 3]).mfv()[0], 1.515, atol=0.4)
+
+    def test_at(self):
+        data = np.array([1, 5, 8, 12, 30])
+        fd = fdt(data, start=data.min(), end=data.max())
+        self.assertEqual(fd.at(), data.max() - data.min())

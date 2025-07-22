@@ -110,7 +110,8 @@ class NumericalFDT(FrequencyDistribution):
     @lru_cache
     def at(self) -> float:
         """Calculate the total amplitude of the data (estimate)."""
-        raise NotImplementedError("TODO")
+        h = self.breaks_info.h
+        return self.breaks_info.end - self.breaks_info.start
 
     @lru_cache
     def median(self) -> float:

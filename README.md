@@ -41,6 +41,12 @@ pip install -e .
 
 ## tools
 
+Use `unittest` for running automatic tests (included in python):
+
+```sh
+python -m unittest discover -s tests
+```
+
 Use `black` for code formatting (`pip install black`):
 
 ```sh
