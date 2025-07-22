@@ -25,13 +25,14 @@ class NumericalFDT(FrequencyDistribution):
     """Stores information about a numerical frequency distribution, and allows related operations."""
 
     table: pd.DataFrame
-    """The inner frequency distribution table. Columns:
-        - "Class limits": the limits of the class.
-        - "f": the absolute frequency of each class.
-        - "rf": the relative frequency of each class.
-        - "rf(%)": the relative frequency expressed as a percentage.
-        - "cf": the cumulative absolute frequency.
-        - "cf(%)": the cumulative relative frequency expressed as a percentage.
+    """
+    The inner frequency distribution table. Columns:
+    - `Class limits`: the limits of the class;
+    - `f`: the absolute frequency of each class;
+    - `rf`: the relative frequency of each class;
+    - `rf(%)`: the relative frequency expressed as a percentage;
+    - `cf`: the cumulative absolute frequency;
+    - `cf(%)`: the cumulative relative frequency expressed as a percentage.
     """
 
     breaks_info: BreaksInfo
@@ -308,7 +309,8 @@ class NumericalFDT(FrequencyDistribution):
     def _make_fdt_simple(
         data: pd.Series, start: float, end: float, h: float, right: bool = False
     ) -> pd.DataFrame:
-        """Create a simple frequency distribution table.
+        """
+        Create a simple frequency distribution table.
 
         :param data: The data array.
         :param start: The starting point of the distribution range.

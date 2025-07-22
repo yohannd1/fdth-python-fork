@@ -12,13 +12,14 @@ class CategoricalFDT(FrequencyDistribution):
     """Stores information about a categorical frequency distribution, and allows related operations."""
 
     table: pd.DataFrame
-    """The inner frequency distribution table. Columns:
-        - "Category": the unique categories.
-        - "f": the absolute frequency of each category.
-        - "rf": the relative frequency of each category.
-        - "rf(%)": the relative frequency expressed as a percentage.
-        - "cf": the cumulative absolute frequency.
-        - "cf(%)": the cumulative relative frequency expressed as a percentage.
+    """
+    The inner frequency distribution table. Columns:
+    - `Category`: the unique categories;
+    - `f`: the absolute frequency of each category;
+    - `rf`: the relative frequency of each category;
+    - `rf(%)`: the relative frequency expressed as a percentage;
+    - `cf`: the cumulative absolute frequency;
+    - `cf(%)`: the cumulative relative frequency expressed as a percentage.
     """
 
     def __init__(
@@ -29,9 +30,10 @@ class CategoricalFDT(FrequencyDistribution):
         sort: bool = True,
         decreasing: bool = False,
     ) -> None:
-        """Create the frequency distribution class.
+        """
+        Create the frequency distribution class.
 
-        Either `data` or `freqs` must be specified.
+        Note that either `data` or `freqs` must be specified.
 
         :param data: a data set of which the frequency must be analyzed
         :param freqs: a pandas.Series with the value at a specific index being the absolute frequency of said category, or a dict with the key being a category and the value being the frequency
@@ -90,7 +92,7 @@ class CategoricalFDT(FrequencyDistribution):
         # rotacionar os rótulos das categorias para ficarem legíveis
         plt.xticks(rotation=0)
 
-    @lru_cache(maxsize=1)
+    @lru_cache
     def mfv(self) -> pd.Series:
         """Returns the most frequent values (modes) of the data set."""
         return self._data.mode().iloc[0:]
@@ -129,9 +131,7 @@ class CategoricalFDT(FrequencyDistribution):
     def _make_table_from_data(
         data: pd.Series, sort: bool, decreasing: bool
     ) -> tuple[int, pd.DataFrame]:
-        """
-        Create a frequency distribution table (FDT) for a set of categorical data.
-        """
+        """Create a frequency distribution table (FDT) for a set of categorical data."""
 
         # FIXME: is this needed? it would make using numbered categories impossible
         # if data.dtypes.name not in {"object", "category"}:
@@ -183,58 +183,52 @@ class CategoricalFDT(FrequencyDistribution):
 
     def plot(
         self,
-        plot_type="fb",
-        v=False,
-        v_round=2,
-        v_pos=3,
-        xlab=None,
-        xlas=0,
-        ylab=None,
-        y2lab=None,
+        plot_type: str = "fb",
+        v: bool = False,
+        v_round: int = 2,
+        v_pos: int = 3,
+        xlab: Optional[str] = None,
+        xlas: int = 0,
+        ylab: Optional[str] = None,
+        y2lab: Optional[str] = None,
         y2cfp=np.arange(0, 101, 25),
-        col="0.4",
-        xlim=None,
-        ylim=None,
-        main=None,
-        box=False,
-    ):
+        col: str = "0.4",
+        xlim: Optional[tuple[float, float]] = None,  # FIXME: unused?
+        ylim: Optional[tuple[float, float]] = None,
+        main: Optional[str] = None,
+        box: bool = False,
+    ) -> None:
         """
-        Plot a frequency distribution table (FDT) for categorical data.
+        Make one of a series of FDT plots.
 
-        Parameters:
-        x (DataFrame): Input DataFrame with columns including category labels,
-                    frequencies, relative frequencies, and cumulative frequencies.
-        plot_type (str): Type of plot to generate. Options include:
-                        'fb' - bar plot with frequencies,
-                        'fp' - polygon plot with frequencies,
-                        'fd' - dot chart with frequencies,
-                        'pa' - Pareto plot with cumulative frequencies,
-                        'rfb' - bar plot with relative frequencies,
-                        'rfp' - polygon plot with relative frequencies,
-                        'rfd' - dot chart with relative frequencies,
-                        'rfpb' - bar plot with relative frequencies in %,
-                        'rfpp' - polygon plot with relative frequencies in %,
-                        'rfpd' - dot chart with relative frequencies in %,
-                        'cfb' - bar plot with cumulative frequencies,
-                        'cfp' - polygon plot with cumulative frequencies,
-                        'cfd' - dot chart with cumulative frequencies,
-                        'cfpb' - bar plot with cumulative frequencies in %,
-                        'cfpp' - polygon plot with cumulative frequencies in %,
-                        'cfpd' - dot chart with cumulative frequencies in %.
-        v (bool): If True, display values on the plot.
-        v_round (int): Decimal places for values displayed on the plot.
-        v_pos (int): Vertical position for value labels.
-        xlab (str): Label for the x-axis.
-        xlas (int): Rotation angle for x-axis labels. Defaults to 0.
-        ylab (str): Label for the y-axis.
-        y2lab (str): Label for the secondary y-axis (used in Pareto plot).
-        y2cfp (array): Percentage ticks for cumulative frequency y-axis in Pareto plot.
-        col (str): Color for plot elements. Default is '0.4' (gray).
-        xlim (tuple): Limits for the x-axis.
-        ylim (tuple): Limits for the y-axis.
-        main (str): Title for the plot.
-        box (bool): If True, display a box around the plot.
+        Supported plots:
+        - `fb`: bar plot with frequencies;
+        - `fp`: polygon plot with frequencies;
+        - `fd`: dot chart with frequencies;
+        - `pa`: Pareto plot with cumulative frequencies;
+        - `rfb`: bar plot with relative frequencies;
+        - `rfp`: polygon plot with relative frequencies;
+        - `rfd`: dot chart with relative frequencies;
+        - `rfpb`: bar plot with relative frequencies in %;
+        - `rfpp`: polygon plot with relative frequencies in %;
+        - `rfpd`: dot chart with relative frequencies in %;
+        - `cfb`: bar plot with cumulative frequencies;
+        - `cfp`: polygon plot with cumulative frequencies;
+        - `cfd`: dot chart with cumulative frequencies;
+        - `cfpb`: bar plot with cumulative frequencies in %;
+        - `cfpp`: polygon plot with cumulative frequencies in %;
+        - `cfpd`: dot chart with cumulative frequencies in %.
 
+        :param plot_type: type of plot to generate.
+        :param v: if True, display values on the plot.
+        :param v_round: decimal places for values displayed on the plot.
+        :param v_pos: vertical position for value labels.
+        :param xlab: label for the x-axis.
+        :param xlas: rotation angle for x-axis labels. Defaults to 0.
+        :param ylab: label for the y-axis.
+        :param y2lab: label for the secondary y-axis (used in Pareto plot).
+        :param y2cfp: percentage ticks for cumulative frequency y-axis in Pareto plot.
+        :param col: color for plot elements. Default is '0.4' (gray).
         """
         x = self.get_table()
 
@@ -332,7 +326,9 @@ class CategoricalFDT(FrequencyDistribution):
                 bar_positions, cf, color="blue", marker="o", linestyle="-", markersize=5
             )
             ax2.set_ylabel(y2lab)
-            ax2.set_ylim(0, max(cf) * 1.1)  # Ensure y-axis limit for cumulative frequency
+            ax2.set_ylim(
+                0, max(cf) * 1.1
+            )  # Ensure y-axis limit for cumulative frequency
 
             plt.show()
 
@@ -438,5 +434,3 @@ class CategoricalFDT(FrequencyDistribution):
             y = x.iloc[:, 5]
             xlab = xlab or "Cumulative frequency (%)"
             plot_d(y, categories)
-
-        
