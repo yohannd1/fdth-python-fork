@@ -5,7 +5,7 @@ import numpy as np
 
 from .utils import deduce_fdt_kind
 from .frequency_distribution import FrequencyDistribution
-from .numerical_fdt import NumericalFDT, NumericalBin
+from .numerical_fdt import NumericalFDT, BinMode
 from .categorical_fdt import CategoricalFDT
 from .multiple_fdt import MultipleFDT
 
@@ -20,7 +20,7 @@ def fdt(
     # start: float | None = None,
     # end: float | None = None,
     # h: float | None = None,
-    # breaks: NumericalBin = "Sturges",
+    # breaks: BinMode = "Sturges",
     # right: bool = False,
     # na_rm: bool = False,
 ) -> FrequencyDistribution | MultipleFDT:

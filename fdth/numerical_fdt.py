@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from fdth import FrequencyDistribution
 
-NumericalBin = Literal["Sturges", "Scott", "FD"]
+BinMode = Literal["Sturges", "Scott", "FD"]
 
 
 @dataclass
@@ -47,7 +47,7 @@ class NumericalFDT(FrequencyDistribution):
         start: float | None = None,
         end: float | None = None,
         h: float | None = None,
-        breaks: NumericalBin = "Sturges",
+        breaks: BinMode = "Sturges",
         right: bool = False,
         na_rm: bool = False,
     ):
@@ -231,7 +231,7 @@ class NumericalFDT(FrequencyDistribution):
         return res
 
     @staticmethod
-    def _fdt_numeric_simple(data, k, start, end, h, breaks, right, na_rm) -> tuple[pd.DataFrame, BreaksInfo]:
+    def _fdt_numeric_simple(data, k, start, end, h, breaks: BinMode, right, na_rm) -> tuple[pd.DataFrame, BreaksInfo]:
         data = np.array([np.nan if v is None else v for v in data], dtype=np.float64)
 
         if not np.issubdtype(data.dtype, np.number):
