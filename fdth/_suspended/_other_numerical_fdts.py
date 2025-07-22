@@ -11,7 +11,7 @@ class NumericalFDT(FrequencyDistribution):
         start: float | None = None,
         end: float | None = None,
         h: float | None = None,
-        breaks: NumericalBin = "Sturges",
+        breaks: BinMode = "Sturges",
         right: bool = False,
         na_rm: bool = False,
     ):
