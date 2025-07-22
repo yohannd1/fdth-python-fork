@@ -226,10 +226,7 @@ class NumericalFDT(FrequencyDistribution):
 
     def __repr__(self) -> str:
         res = f"NumericalFDT ({self.count} elements, {self.breaks_info.k} classes, amplitude of {self.breaks_info.h:.2f}):\n"
-        res += self.to_string(max_lines=5) + "\n"
-        if self.count > 5:
-            res += f"... {self.count-5} more lines"
-
+        res += self.to_string()
         return res
 
     @staticmethod

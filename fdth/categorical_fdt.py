@@ -178,12 +178,8 @@ class CategoricalFDT(FrequencyDistribution):
     def __repr__(self) -> str:
         cat_count = self.table.shape[0]
         res = f"CategoricalFDT ({self.count} elements, {cat_count} categories):\n"
-        res += self.to_string(max_lines=5) + "\n"
-        if self.count > 5:
-            res += f"... {self.count-5} more lines"
-
+        res += self.to_string()
         return res
-
 
     def plot(
         self,
