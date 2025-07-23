@@ -5,7 +5,7 @@ A python port of the [fdth](https://github.com/jcfaria/fdth) R library.
 Feito como projeto da disciplina "Probabilidade e Estatística" (Ciência
 da Computação, UESC).
 
-TODO: contributors, credits and license (public domain?)
+TODO: license (public domain?)
 
 ## examples
 
@@ -64,3 +64,19 @@ Use `mypy` for type checking (`pip install mypy`):
 ```sh
 mypy --strict --cache-fine-grained .
 ```
+
+## credits
+
+[Original version](https://github.com/jcfaria/fdth) created by [José
+Cláudio Faria](https://github.com/jcfaria), [Ivan Bezerra
+Allaman](https://github.com/ivanalaman) and [Jakson Alves de
+Aquino](https://github.com/jalvesaq).
+
+[Initial python port](https://github.com/yuriccosta/fdth-python) by
+[Emyle Silva](https://github.com/EmyleSilva), [Lucas Gabriel
+Ferreira](https://github.com/lgferreiracic), [Yuri Coutinho
+Costa](https://github.com/yuriccosta), and [Maria
+Clara](https://github.com/MaryClaraSimoes).
+
+Current version made by Gabriel Galdino, Luciene Mª Torquato C. Batista,
+Stella Ribas, Thainá Guimarães and Yohanan Santana.
