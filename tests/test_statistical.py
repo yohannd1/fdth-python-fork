@@ -13,22 +13,28 @@ class Test(unittest.TestCase):
     def test_mean_fdt(self):
         data = np.array([1, 5, 3, 2, 1, 8])
         fd = fdt(data)
-        self.assertClose(data.mean(), fd.mean(), atol=0.5)
+        self.assertClose(fd.mean(), data.mean(), atol=0.5)
 
     def test_var_fdt(self):
         data = np.array([1, 5, 3, 2, 1, 8])
         fd = fdt(data)
-        self.assertClose(data.var(), fd.var(), atol=1.5)
+        self.assertClose(fd.var(), data.var(), atol=1.5)
 
     def test_sd_fdt(self):
         data = np.array([1, 5, 3, 2, 1, 8])
         fd = fdt(data)
-        self.assertClose(data.std(), fd.sd(), atol=1.5)
+        self.assertClose(fd.sd(), data.std(), atol=1.5)
 
     def test_median(self):
         data = np.array([1, 5, 3, 2, 1, 8])
         fd = fdt(data)
-        self.assertClose(np.median(data), fd.median(), atol=0.4)
+        self.assertClose(fd.median(), np.median(data), atol=0.4)
+
+    def test_quantiles(self):
+        data = np.array([1, 5, 3, 2, 1, 8])
+        fd = fdt(data)
+        self.assertEqual(fd.median(), fd.quantile(0.5))
+        self.assertEqual(fd.median(), fd.quantiles([0.5]).iloc[0])
 
     def test_mfv(self):
         def mfv_and_compare(data, expected_mfv) -> None:
