@@ -1,4 +1,4 @@
-from typing import Optional, Literal, Sequence, Any
+from typing import Optional, Literal, Sequence, Any, Callable
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -114,35 +114,60 @@ class NumericalFDT(FrequencyDistribution):
         h = self.breaks_info.h
         return self.breaks_info.end - self.breaks_info.start
 
-    @lru_cache
-    def median(self) -> float:
-        """Calculate an approximate of the median (50th percentile) of the data represented by the FDT."""
+    @staticmethod
+    def quantile_to_percentile(x: float) -> str:
+        return f"{x * 100:.2f}%"
+
+    def quantiles(
+        self,
+        bins: Sequence[float] = np.arange(0.0, 1.0, 0.1),
+        fmt_fn: Callable[[float], str] | None = None,
+    ) -> pd.Series:
+        """
+        Calculate an approximate of multiple quantiles of the data represented by the FDT.
+
+        :param bins: array of values between 0 and 1
+        :param fmt_fn: function that maps the quantile number to a representation in the result. Defaults to percentile formatting.
+        """
+        if fmt_fn is None:
+            fmt_fn = self.quantile_to_percentile
+        return pd.Series({fmt_fn(b): self.quantile(b) for b in bins})
+
+    def quantile(self, pos: float) -> float:
+        """
+        Calculate an approximate of a quantile of the data represented by the FDT.
+
+        :param pos: position of the quantile - must be between 0 and 1.
+        """
+        if not (0.0 <= pos <= 1.0):
+            raise ValueError(f"quantile position {pos} out of range - must be in [0, 1]")
 
         start = self.breaks_info.start
         end = self.breaks_info.end
         h = self.breaks_info.h
 
-        # Número total de observações
-        n = self.table.iloc[-1, 4]
+        pos_count = self.count * pos
 
         # Posição da classe mediana
-        posM = (n / 2 <= self.table.iloc[:, 4]).idxmax()
+        pos_m = np.where(pos_count <= self.table.iloc[:, 4])[0][0]
 
-        brk = np.arange(start, end + h, h)
+        breaks = np.arange(start, end + h, h)
 
         # Limite inferior da classe mediana
-        liM = brk[posM]
+        li_m = breaks[pos_m]
 
         # Frequência acumulada anterior à classe mediana
-        if posM - 1 < 0:
-            sfaM = 0
-        else:
-            sfaM = self.table.iloc[posM - 1, 4]
+        sfa_m = self.table.iloc[pos_m - 1, 4] if pos_m >= 1 else 0
 
         # Frequência da classe mediana
-        fM = self.table.iloc[posM, 1]
+        f_m = self.table.iloc[pos_m, 1]
 
-        return liM + (((n / 2) - sfaM) * h) / fM
+        return li_m + ((pos_count - sfa_m) * h) / f_m
+
+    @lru_cache
+    def median(self) -> float:
+        """Calculate an approximate of the median (50th percentile) of the data represented by the FDT."""
+        return self.quantile(0.5)
 
     @lru_cache
     def var(self) -> float:
@@ -165,12 +190,12 @@ class NumericalFDT(FrequencyDistribution):
 
     @lru_cache
     def sd(self) -> float:
-        """Calculates the standard deviation (square root of the variance)."""
+        """Calculate the standard deviation (square root of the variance)."""
         return np.sqrt(self.var())
 
     @lru_cache
     def mfv(self) -> pd.Series:
-        """Returns an approximation of the most frequent values (modes) of the data set."""
+        """Calculate an approximation of the most frequent values (modes) of the data set."""
 
         freqs = self.table["f"].values
         bins = self.breaks_info.bins
@@ -231,7 +256,9 @@ class NumericalFDT(FrequencyDistribution):
         return res
 
     @staticmethod
-    def _fdt_numeric_simple(data, k, start, end, h, breaks: BinMode, right, na_rm) -> tuple[pd.DataFrame, BreaksInfo]:
+    def _fdt_numeric_simple(
+        data, k, start, end, h, breaks: BinMode, right, na_rm
+    ) -> tuple[pd.DataFrame, BreaksInfo]:
         data = np.array([np.nan if v is None else v for v in data], dtype=np.float64)
 
         if not np.issubdtype(data.dtype, np.number):
