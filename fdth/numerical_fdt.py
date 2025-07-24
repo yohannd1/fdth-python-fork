@@ -51,7 +51,22 @@ class NumericalFDT(FrequencyDistribution):
         right: bool = False,
         na_rm: bool = False,
     ):
-        if data is not None:
+        """
+        Create a simple frequency distribution table.
+
+        :param data: the data array.
+        :param freqs: the data array.
+        :param start: the starting point of the distribution range.
+        :param end: the endpoint of the distribution range.
+        :param h: the class interval width.
+        :param right: whether to include the right endpoint in each interval.
+
+        :return a frequency distribution table with class limits, frequencies, relative frequencies, cumulative frequencies, and cumulative percentages.
+        """
+
+        if data is not None and freqs is not None:
+            raise ValueError("exactly one of `data` or `table` must be specified")
+        elif data is not None:
             if freqs is not None:
                 raise ValueError("`data` and `freqs` must not be both specified")
 
@@ -85,8 +100,6 @@ class NumericalFDT(FrequencyDistribution):
                 raise TypeError("`data` must be dict | pandas.Series")
 
             raise NotImplementedError("TODO")
-        else:
-            raise ValueError("one of `data` or `table` must be specified")
 
     @lru_cache
     def _breaks(self) -> np.ndarray:
@@ -170,7 +183,9 @@ class NumericalFDT(FrequencyDistribution):
     @lru_cache
     def var(self) -> float:
         """Calculate an approximate of the variance of the data represented by the FDT."""
-        return np.sum((self._midpoints() - self.mean()) ** 2 * self.table["f"]) / (self.count - 1)
+        return np.sum((self._midpoints() - self.mean()) ** 2 * self.table["f"]) / (
+            self.count - 1
+        )
 
     @lru_cache
     def sd(self) -> float:
@@ -302,13 +317,13 @@ class NumericalFDT(FrequencyDistribution):
             raise ValueError("Please check the function syntax!")
 
         # generate the frequency distribution table
-        table, bins = NumericalFDT._make_fdt_simple(
+        table, bins = NumericalFDT._make_table_from_data(
             data=data,
             start=start,
             end=end,
             h=h,
             right=right,
-            class_round=2, # FIXME: receive this as a parameter
+            class_round=2,  # FIXME: receive this as a parameter
         )
 
         breaks_info = BreaksInfo(
@@ -320,46 +335,50 @@ class NumericalFDT(FrequencyDistribution):
             bins=bins,
         )
 
-        return table, breaks_info
+        return (table, breaks_info)
 
     @staticmethod
-    def _make_fdt_simple(
+    def _make_table_from_data(
         data: pd.Series,
         start: float,
         end: float,
         h: float,
         right: bool,
         class_round: Optional[int],
-    ) -> pd.DataFrame:
-        """
-        Create a simple frequency distribution table.
+    ) -> tuple[pd.DataFrame, np.ndarray]:
+        bins = np.arange(start, end + h, h)
+        freqs = pd.cut(data, bins=bins, right=right).value_counts()
+        return NumericalFDT._make_table_from_frequencies(
+            freqs=freqs, start=start, end=end, h=h, right=right, class_round=class_round
+        )
 
-        :param data: The data array.
-        :param start: The starting point of the distribution range.
-        :param end: The endpoint of the distribution range.
-        :param h: The class interval width.
-        :param right: Whether to include the right endpoint in each interval.
-
-        :return a frequency distribution table with class limits, frequencies, relative frequencies, cumulative frequencies, and cumulative percentages.
-        """
+    @staticmethod
+    def _make_table_from_frequencies(
+        freqs: pd.Series,
+        start: float,
+        end: float,
+        h: float,
+        right: bool,
+        class_round: Optional[int],
+    ) -> tuple[pd.DataFrame, np.ndarray]:
         bins = np.arange(start, end + h, h)
 
-        # TODO: zip(np.round(self.bins[:-1], 2), np.round(self.bins[1:], 2))
-
         r = class_round if class_round is not None else 2
-        labels = [
-            f"[{round(bins[i], r)}, {round(bins[i + 1], r)})"
-            for i in range(len(bins) - 1)
+
+        classes = [
+            NumericalFDT._format_class(a, b, round_=r, right=right)
+            for (a, b) in zip(bins[:-1], bins[1:])
         ]
-        f = pd.cut(data, bins=bins, right=right, labels=labels).value_counts()
-        rf = f / len(data)
+
+        n = freqs.sum()
+        rf = freqs / n
         rfp = rf * 100
-        cf = f.cumsum()
-        cfp = (cf / len(data)) * 100
+        cf = freqs.cumsum()
+        cfp = cf / n * 100
 
         table = pd.DataFrame({
-            "Class limits": labels,
-            "f": f.values,
+            "Class limits": classes,
+            "f": freqs.values,
             "rf": rf.values,
             "rf(%)": rfp.values,
             "cf": cf.values,
@@ -368,4 +387,13 @@ class NumericalFDT(FrequencyDistribution):
 
         table.index = np.arange(1, len(table) + 1)
 
-        return table, bins
+        return (table, bins)
+
+    @staticmethod
+    def _format_class(a, b, round_: int, right: bool) -> str:
+        ra = round(a, round_)
+        rb = round(b, round_)
+        if not right:
+            return f"[{ra}, {rb})"
+        else:
+            return f"({ra}, {rb}]"
