@@ -179,7 +179,7 @@ class CategoricalFDT:
         - `fb`: bar plot with frequencies;
         - `fp`: polygon plot with frequencies;
         - `fd`: dot chart with frequencies;
-        - `pa`: Pareto plot with cumulative frequencies;
+        - `pa`: pareto plot with cumulative frequencies;
         - `rfb`: bar plot with relative frequencies;
         - `rfp`: polygon plot with relative frequencies;
         - `rfd`: dot chart with relative frequencies;

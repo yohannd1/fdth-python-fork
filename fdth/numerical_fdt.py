@@ -225,8 +225,8 @@ class NumericalFDT:
         Make one of a collection of plots.
 
         Supported plots:
-        - `fh`: TODO;
-        - `fp`: TODO;
+        - `fh`: absolute frequency histogram;
+        - `fp`: absolute frequency polygon;
         - `rfh`: TODO;
         - `rfp`: TODO;
         - `rfph`: TODO;
