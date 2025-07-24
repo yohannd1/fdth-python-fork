@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from .binning import Binning
 
-BinFunc = Callable[[pd.Series], Binning]
+BinFunc = Callable[[pd.Series[float]], Binning]
 """Type definition for a function that takes a dataset and returns a binning configuration for it."""
 
 
@@ -35,18 +35,20 @@ class NumericalFDT:
 
     def __init__(
         self,
-        data: Optional[pd.Series | list | np.ndarray] = None,
+        data: Optional[pd.Series[float] | Sequence[float]] = None,
         *,
-        freqs: Optional[pd.Series | list] = None,
+        freqs: Optional[pd.Series[float] | Sequence[float]] = None,
         binning: Binning | BinFunc = Binning.from_sturges,
         right: bool = False,
         remove_nan: bool = False,
+        round_: int = 2,
     ):
         """
         :param data: the data array;
         :param freqs: the frequency array - an alternative to the data array;
         :param binning: the binning, or a function that generates the binning based on the data;
         :param right: whether to include the right endpoint in each interval;
+        :param round_: the rounding level for the numbers in the table;
 
         :return a frequency distribution table with class limits, frequencies, relative frequencies, cumulative frequencies, and cumulative percentages.
         """
@@ -58,9 +60,7 @@ class NumericalFDT:
             self.count = len(data)
 
             b = binning(data) if callable(binning) else binning
-            self.table = self._make_table_from_data(
-                data, b, right, class_round=2
-            )  # TODO: specify rounding...
+            self.table = self._make_table_from_data(data, b, right, round_=round_)
             self.binning = b
         elif freqs is not None:
             if not isinstance(binning, Binning):
@@ -69,15 +69,15 @@ class NumericalFDT:
                 )
 
             freqs = pd.Series(freqs)
-            self.count = freqs.sum()
+            self.count = int(freqs.sum())
 
             self.table = self._make_table_from_frequencies(
-                freqs, binning, right, class_round=2
-            )  # TODO: specify rounding...
+                freqs, binning, right, round_=round_
+            )
             self.binning = binning
 
     @staticmethod
-    def _cleanup_data(data: Sequence[float], remove_nan: bool) -> pd.Series:
+    def _cleanup_data(data: pd.Series[float] | Sequence[float], remove_nan: bool) -> pd.Series[float]:
         d = np.array([np.nan if v is None else v for v in data], dtype=np.float64)
         if not np.issubdtype(d.dtype, np.number):
             raise ValueError("input data must be numeric")
@@ -234,8 +234,8 @@ class NumericalFDT:
         data: pd.Series,
         binning: Binning,
         right: bool,
-        class_round: Optional[int],
-    ) -> tuple[pd.DataFrame, np.ndarray]:
+        round_: int,
+    ) -> pd.DataFrame:
         freqs = pd.cut(
             data.to_numpy(),  # XXX: converting it to numpy makes the order work. Why?
             bins=binning.bins,
@@ -243,7 +243,7 @@ class NumericalFDT:
         ).value_counts()
 
         return NumericalFDT._make_table_from_frequencies(
-            freqs, binning, right=right, class_round=class_round
+            freqs, binning, right=right, round_=round_
         )
 
     @staticmethod
@@ -251,11 +251,11 @@ class NumericalFDT:
         freqs: pd.Series,
         binning: Binning,
         right: bool,
-        class_round: Optional[int],
+        round_: int,
     ) -> pd.DataFrame:
         bins = binning.bins
-        r = class_round if class_round is not None else 2
-        classes = binning.format_classes(round_=class_round, right=right)
+        r = round_ if round_ is not None else 2
+        classes = binning.format_classes(round_=round_, right=right)
 
         n = freqs.sum()
         rf = freqs / n
