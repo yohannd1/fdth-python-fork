@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from fdth import fdt, NumericalFDT
+from fdth import fdt, NumericalFDT, Binning
 
 class Test(unittest.TestCase):
     def test_numerical_fdt(self):
@@ -33,3 +33,14 @@ class Test(unittest.TestCase):
         repr_output = repr(fd)
         assert isinstance(repr_output, str)
         assert "NumericalFDT" in repr_output
+
+    def test_binnings(self):
+        data = [1, 2, 6, 8, 10]
+        fd = fdt(data, binning=Binning.from_sturges)
+        fd = fdt(data, binning=Binning.from_scott)
+        fd = fdt(data, binning=Binning.from_fd)
+
+    def test_from_freqs(self):
+        freqs = [5, 2, 1, 3]
+        fd = fdt(freqs=pd.Series(freqs), binning=Binning.linspace(start=1, end=10, k=4))
+        fd = NumericalFDT(freqs=freqs, binning=Binning.linspace(start=1, end=10, k=4))

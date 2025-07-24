@@ -1,72 +1,63 @@
-from typing import Literal
+from typing import Literal, Optional, Any
 
 import pandas as pd
 import numpy as np
 
 from .utils import deduce_fdt_kind
-from .frequency_distribution import FrequencyDistribution
-from .numerical_fdt import NumericalFDT, BinMode
+from .numerical_fdt import NumericalFDT
 from .categorical_fdt import CategoricalFDT
 from .multiple_fdt import MultipleFDT
 
 
 def fdt(
-    data: pd.Series | list | pd.DataFrame | np.ndarray,
+    data: Optional[pd.Series | list | pd.DataFrame | np.ndarray] = None,
+    *,
+    freqs: Optional[pd.Series | list | dict[Any, int]] = None,
     kind: Literal["numerical", "categorical", None] = None,
     **kwargs,
-    # sort: bool = True,
-    # decreasing: bool = True,
-    # k: int | None = None,
-    # start: float | None = None,
-    # end: float | None = None,
-    # h: float | None = None,
-    # breaks: BinMode = "Sturges",
-    # right: bool = False,
-    # na_rm: bool = False,
-) -> FrequencyDistribution | MultipleFDT:
+) -> NumericalFDT | CategoricalFDT | MultipleFDT:
     """
-    Create a frequency distribution table for the specified data.
+    Create a frequency distribution table for a given data set or frequency set, automatically detecting whether it is supposed to refer to a numerical one, a categorical one or a combination 2 or more of them.
 
-    TODO: talk about the deductions used to determine whether it will use a NumericalFDT or a CategoricalFDT
+    Trailing parameters are forwarded to the constructors of `fdth.numerical_fdt.NumericalFDT`, `fdth.categorical_fdt.CategoricalFDT` and `fdth.multiple_fdt.MultipleFDT`.
 
     :param data: the input data set, or collection of data sets (with pandas.DataFrame or numpy.ndarray)
-
-    :param sort: (for categorical FDTs) if True, sorts the table by frequency.
-    :param decreasing: (for categorical FDTs) if sort is True, sorts in the descending if it is True, otherwise in ascending order.
-
-    :param k: (for numerical FDTs) the number of bins/classes. If None, calculates the number based on the method specified on the `breaks` argument.
-    :param start: (for numerical FDTs) the start of the interval range.
-    :param end: (for numerical FDTs) the end of the interval range.
-    :param h: (for numerical FDTs) the class interval width.
-    :param breaks: (for numerical FDTs) method for determining bins ('Sturges', 'Scott', 'FD').
-    :param right: (for numerical FDTs) whether to include the right endpoint in each interval.
-    :param na_rm: (for numerical FDTs) remove missing values if True.
-
-    :return: a DataFrame containing the frequency distribution table.
+    :param freqs: frequencies, as an alternative to inputting the data itself. If it is a series, it will be interpreted as numerical, and if it is a dictionary, it will be interpreted as categorical.
     """
 
-    data_series: pd.Series
+    data_: pd.Series
 
     if isinstance(data, list):
-        data_series = pd.Series(data)
+        data_ = pd.Series(data)
     elif isinstance(data, pd.Series):
-        data_series = data
+        data_ = data
     elif isinstance(data, np.ndarray):
         if data.ndim == 1:
-            data_series = pd.Series(data)
+            data_ = pd.Series(data)
         else:
             return MultipleFDT(data)
     elif isinstance(data, pd.DataFrame):
         return MultipleFDT(data)
+    elif data is None and freqs is not None:
+        if isinstance(freqs, pd.Series | list):
+            if kind is not None and kind != "numerical":
+                raise TypeError("`freqs` (as pandas.Series | list) can only be used with `numerical` type FDTs")
+            return NumericalFDT(freqs=freqs, **kwargs)
+        elif isinstance(freqs, dict):
+            if kind is not None and kind != "categorical":
+                raise TypeError("`freqs` (as dict) can only be used with `categorical` type FDTs")
+            return CategoricalFDT(freqs=freqs, **kwargs)
+        else:
+            raise TypeError("`freqs` must be pandas.Series | list | dict when specified")
     else:
         raise TypeError(
-            "data must be list | pandas.Series | pandas.DataFrame | numpy.ndarray"
+            "`data` must be list | pandas.Series | pandas.DataFrame | numpy.ndarray, or `freqs` must be specified"
         )
 
-    kind = kind or deduce_fdt_kind(data_series)
+    kind = kind or deduce_fdt_kind(data_)
     if kind == "categorical":
-        return CategoricalFDT(data_series, **kwargs)
+        return CategoricalFDT(data_, **kwargs)
     elif kind == "numerical":
-        return NumericalFDT(data_series, **kwargs)
+        return NumericalFDT(data_, **kwargs)
     else:
         raise TypeError(f"unexpected kind: {repr(kind)}")

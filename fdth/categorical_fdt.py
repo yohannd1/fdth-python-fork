@@ -9,7 +9,7 @@ from fdth import FrequencyDistribution
 
 
 class CategoricalFDT(FrequencyDistribution):
-    """Stores information about a categorical frequency distribution, and allows related operations."""
+    """Stores information about a categorical frequency distribution, and provides relevant operations."""
 
     table: pd.DataFrame
     """

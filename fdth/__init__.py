@@ -40,7 +40,8 @@ See the `examples/` folder for more usage examples.
 """
 
 from .frequency_distribution import FrequencyDistribution
-from .numerical_fdt import NumericalFDT, BinMode
+from .numerical_fdt import NumericalFDT
 from .categorical_fdt import CategoricalFDT
 from .multiple_fdt import MultipleFDT
 from .auto_fdt import fdt
+from .binning import Binning

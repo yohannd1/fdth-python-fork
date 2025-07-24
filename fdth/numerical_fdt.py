@@ -1,5 +1,6 @@
-from typing import Optional, Literal, Sequence, Any, Callable
-from dataclasses import dataclass
+from __future__ import annotations
+
+from typing import Optional, Sequence, Any, Callable
 from functools import lru_cache
 
 import pandas as pd
@@ -7,22 +8,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from fdth import FrequencyDistribution
+from .binning import Binning
 
-BinMode = Literal["Sturges", "Scott", "FD"]
-
-
-@dataclass(frozen=True)
-class BreaksInfo:
-    start: float
-    end: float
-    h: float
-    k: int
-    right: bool
-    bins: np.ndarray
+BinFunc = Callable[[pd.Series], Binning]
+"""Type definition for a function that takes a dataset and returns a binning configuration for it."""
 
 
 class NumericalFDT(FrequencyDistribution):
-    """Stores information about a numerical frequency distribution, and allows related operations."""
+    """Stores information about a numerical frequency distribution, and provides relevant operations."""
 
     table: pd.DataFrame
     """
@@ -35,85 +28,73 @@ class NumericalFDT(FrequencyDistribution):
     - `cf(%)`: the cumulative relative frequency expressed as a percentage.
     """
 
-    breaks_info: BreaksInfo
-    """Information about the binning done in the creation of the FDT."""
+    count: int
+    """The amount of elements in the dataset."""
+
+    binning: Binning
+    """Information about the binning for this FDT."""
 
     def __init__(
         self,
         data: Optional[pd.Series | list | np.ndarray] = None,
         *,
-        freqs: Optional[pd.Series | dict] = None,
-        k: int | None = None,
-        start: float | None = None,
-        end: float | None = None,
-        h: float | None = None,
-        breaks: BinMode = "Sturges",
+        freqs: Optional[pd.Series | list] = None,
+        binning: Binning | BinFunc = Binning.from_sturges,
         right: bool = False,
-        na_rm: bool = False,
+        remove_nan: bool = False,
     ):
         """
-        Create a simple frequency distribution table.
-
-        :param data: the data array.
-        :param freqs: the data array.
-        :param start: the starting point of the distribution range.
-        :param end: the endpoint of the distribution range.
-        :param h: the class interval width.
-        :param right: whether to include the right endpoint in each interval.
+        :param data: the data array;
+        :param freqs: the frequency array - an alternative to the data array;
+        :param binning: the binning, or a function that generates the binning based on the data;
+        :param right: whether to include the right endpoint in each interval;
 
         :return a frequency distribution table with class limits, frequencies, relative frequencies, cumulative frequencies, and cumulative percentages.
         """
 
         if data is not None and freqs is not None:
-            raise ValueError("exactly one of `data` or `table` must be specified")
+            raise ValueError("exactly one of `data` or `freqs` must be specified")
         elif data is not None:
-            if freqs is not None:
-                raise ValueError("`data` and `freqs` must not be both specified")
-
-            if isinstance(data, (list, np.ndarray)):
-                data = pd.Series(data)
-            elif isinstance(data, pd.Series):
-                pass
-            else:
-                raise TypeError("`data` must be list | pandas.Series | numpy.ndarray")
-
+            data = self._cleanup_data(data, remove_nan=remove_nan)
             self.count = len(data)
-            self.table, self.breaks_info = self._fdt_numeric_simple(
-                data,
-                k=k,
-                start=start,
-                end=end,
-                h=h,
-                breaks=breaks,
-                right=right,
-                na_rm=na_rm,
-            )
+
+            b = binning(data) if callable(binning) else binning
+            self.table = self._make_table_from_data(
+                data, b, right, class_round=2
+            )  # TODO: specify rounding...
+            self.binning = b
         elif freqs is not None:
-            if data is not None:
-                raise ValueError("`data` and `freqs` must not be both specified")
+            if not isinstance(binning, Binning):
+                raise ValueError(
+                    "a ready-made binning must be specified when passing `freqs`"
+                )
 
-            if isinstance(freqs, dict):
-                freqs = pd.Series(freqs)
-            elif isinstance(freqs, pd.Series):
-                pass
-            else:
-                raise TypeError("`data` must be dict | pandas.Series")
+            freqs = pd.Series(freqs)
+            self.count = freqs.sum()
 
-            raise NotImplementedError("TODO")
+            self.table = self._make_table_from_frequencies(
+                freqs, binning, right, class_round=2
+            )  # TODO: specify rounding...
+            self.binning = binning
 
-    @lru_cache
-    def _breaks(self) -> np.ndarray:
-        # FIXME: can we replace this with "bins"?
-        start = self.breaks_info.start
-        end = self.breaks_info.end
-        h = self.breaks_info.h
-        return np.arange(start, end + h, h)
+    @staticmethod
+    def _cleanup_data(data: Sequence[float], remove_nan: bool) -> pd.Series:
+        d = np.array([np.nan if v is None else v for v in data], dtype=np.float64)
+        if not np.issubdtype(d.dtype, np.number):
+            raise ValueError("input data must be numeric")
+
+        if remove_nan:
+            d = d[~np.isnan(d)]
+        elif np.any(np.isnan(d)):
+            raise ValueError("the data has NaN values")
+
+        return pd.Series(d)
 
     @lru_cache
     def _midpoints(self) -> np.ndarray:
         """Calculate the midpoints of the class intervals."""
-        breaks = self._breaks()
-        return 0.5 * (breaks[:-1] + breaks[1:])
+        bins = self.binning.bins
+        return 0.5 * (bins[:-1] + bins[1:])
 
     @lru_cache
     def mean(self) -> float:
@@ -123,8 +104,8 @@ class NumericalFDT(FrequencyDistribution):
     @lru_cache
     def at(self) -> float:
         """Calculate the total amplitude of the data (estimate)."""
-        h = self.breaks_info.h
-        return self.breaks_info.end - self.breaks_info.start
+        h = self.binning.h
+        return self.binning.end - self.binning.start
 
     @staticmethod
     def fmt_percentile(x: float) -> str:
@@ -161,11 +142,11 @@ class NumericalFDT(FrequencyDistribution):
         # get quantile index
         idx = np.where(pos_count <= self.table["cf"])[0][0]
 
-        breaks = self._breaks()
-        h = self.breaks_info.h
+        bins = self.binning.bins
+        h = self.binning.h
 
         # quantile class lower limit
-        ll = breaks[idx]
+        ll = bins[idx]
 
         # cumulative frequency of the previous class
         cf_prev = 0 if idx < 1 else self.table.iloc[idx - 1, 4]
@@ -197,8 +178,8 @@ class NumericalFDT(FrequencyDistribution):
         """Calculate an approximation of the most frequent values (modes) of the data set."""
 
         freqs = self.table["f"].values
-        bins = self.breaks_info.bins
-        h = self.breaks_info.h
+        bins = self.binning.bins
+        h = self.binning.h
 
         # Czuber's formula
         def calculate_mfv(pos: int) -> float:
@@ -245,130 +226,37 @@ class NumericalFDT(FrequencyDistribution):
         return table.to_string(index=row_numbers, justify="right" if right else "left")
 
     def __repr__(self) -> str:
-        res = f"NumericalFDT ({self.count} elements, {self.breaks_info.k} classes, amplitude of {self.breaks_info.h:.2f}):\n"
+        res = f"NumericalFDT ({self.count} elements, {self.binning.k} classes, amplitude of {self.binning.h:.2f}):\n"
         res += self.to_string()
         return res
 
     @staticmethod
-    def _fdt_numeric_simple(
-        data: pd.Series,
-        k: int | None = None,
-        start: float | None = None,
-        end: float | None = None,
-        h: float | None = None,
-        breaks: BinMode = "Sturges",
-        right: bool = False,
-        na_rm: bool = False,
-    ) -> tuple[pd.DataFrame, BreaksInfo]:
-        data = np.array([np.nan if v is None else v for v in data], dtype=np.float64)
-
-        if not np.issubdtype(data.dtype, np.number):
-            raise TypeError("The data vector must be numeric.")
-
-        if na_rm:
-            data = data[~np.isnan(data)]
-        elif np.any(np.isnan(data)):
-            raise ValueError("The data has <NA> values and na.rm=FALSE by default.")
-
-        n = len(data)
-
-        # calculate bins based on the specified method
-        if k is None and start is None and end is None and h is None:
-            if breaks == "Sturges":
-                k = int(np.ceil(1 + 3.322 * np.log10(n)))
-            elif breaks == "Scott":
-                std_dev = np.std(data)
-                k = int(
-                    np.ceil(
-                        (data.max() - data.min()) / (3.5 * std_dev / (n ** (1 / 3)))
-                    )
-                )
-            elif breaks == "FD":
-                iqr = np.percentile(data, 75) - np.percentile(data, 25)
-                k = int(np.ceil((data.max() - data.min()) / (2 * iqr / (n ** (1 / 3)))))
-            else:
-                raise ValueError("Invalid 'breaks' method.")
-
-            start, end = (
-                data.min() - abs(data.min()) / 100,
-                data.max() + abs(data.max()) / 100,
-            )
-            R = end - start
-            h = R / k
-
-        elif start is None and end is None and h is None:
-            start, end = (
-                data.min() - abs(data.min()) / 100,
-                data.max() + abs(data.max()) / 100,
-            )
-            R = end - start
-            h = R / k
-
-        elif k is None and h is None:
-            R = end - start
-            k = int(np.sqrt(abs(R)))
-            k = max(k, 5)
-            h = R / k
-
-        elif k is None:
-            pass
-
-        else:
-            raise ValueError("Please check the function syntax!")
-
-        # generate the frequency distribution table
-        table, bins = NumericalFDT._make_table_from_data(
-            data=data,
-            start=start,
-            end=end,
-            h=h,
-            right=right,
-            class_round=2,  # FIXME: receive this as a parameter
-        )
-
-        breaks_info = BreaksInfo(
-            start=start,
-            end=end,
-            h=h,
-            k=k,
-            right=int(right),
-            bins=bins,
-        )
-
-        return (table, breaks_info)
-
-    @staticmethod
     def _make_table_from_data(
         data: pd.Series,
-        start: float,
-        end: float,
-        h: float,
+        binning: Binning,
         right: bool,
         class_round: Optional[int],
     ) -> tuple[pd.DataFrame, np.ndarray]:
-        bins = np.arange(start, end + h, h)
-        freqs = pd.cut(data, bins=bins, right=right).value_counts()
+        freqs = pd.cut(
+            data.to_numpy(), # XXX: converting it to numpy makes the order work. Why?
+            bins=binning.bins,
+            right=right,
+        ).value_counts()
+
         return NumericalFDT._make_table_from_frequencies(
-            freqs=freqs, start=start, end=end, h=h, right=right, class_round=class_round
+            freqs, binning, right=right, class_round=class_round
         )
 
     @staticmethod
     def _make_table_from_frequencies(
         freqs: pd.Series,
-        start: float,
-        end: float,
-        h: float,
+        binning: Binning,
         right: bool,
         class_round: Optional[int],
-    ) -> tuple[pd.DataFrame, np.ndarray]:
-        bins = np.arange(start, end + h, h)
-
+    ) -> pd.DataFrame:
+        bins = binning.bins
         r = class_round if class_round is not None else 2
-
-        classes = [
-            NumericalFDT._format_class(a, b, round_=r, right=right)
-            for (a, b) in zip(bins[:-1], bins[1:])
-        ]
+        classes = binning.format_classes(round_=class_round, right=right)
 
         n = freqs.sum()
         rf = freqs / n
@@ -385,15 +273,6 @@ class NumericalFDT(FrequencyDistribution):
             "cf(%)": cfp.values,
         }) # fmt: skip
 
-        table.index = np.arange(1, len(table) + 1)
+        table.index = np.arange(1, len(table) + 1)  # FIXME: do we need this?
 
-        return (table, bins)
-
-    @staticmethod
-    def _format_class(a, b, round_: int, right: bool) -> str:
-        ra = round(a, round_)
-        rb = round(b, round_)
-        if not right:
-            return f"[{ra}, {rb})"
-        else:
-            return f"({ra}, {rb}]"
+        return table
