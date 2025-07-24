@@ -155,7 +155,7 @@ class CategoricalFDT:
 
     def plot(
         self,
-        plot_type: str = "fb",
+        type_: str = "fb",
         v: bool = False,
         v_round: int = 2,
         v_pos: int = 3,
@@ -168,10 +168,12 @@ class CategoricalFDT:
         xlim: Optional[tuple[float, float]] = None,
         ylim: Optional[tuple[float, float]] = None,
         main: Optional[str] = None,
+        edgecolor: str = "black",
         box: bool = False,
+        show: bool = True,
     ) -> None:
         """
-        Make one of a series of FDT plots.
+        Make one of a collection of plots.
 
         Supported plots:
         - `fb`: bar plot with frequencies;
@@ -191,7 +193,7 @@ class CategoricalFDT:
         - `cfpp`: polygon plot with cumulative frequencies in %;
         - `cfpd`: dot chart with cumulative frequencies in %.
 
-        :param plot_type: type of plot to generate.
+        :param type_: type of plot to generate.
         :param v: if True, display values on the plot.
         :param v_round: decimal places for values displayed on the plot.
         :param v_pos: vertical position for value labels.
@@ -202,14 +204,14 @@ class CategoricalFDT:
         :param y2cfp: percentage ticks for cumulative frequency y-axis in Pareto plot.
         :param col: color for plot elements. Default is '0.4' (gray).
         """
-        x = self.get_table()
+        x = self.table
 
         # Helper function for bar plot
         def plot_b(y, categories):
             fig, ax = plt.subplots()
             bar_positions = np.arange(len(categories))
 
-            ax.bar(bar_positions, y, color=col, edgecolor="black")
+            ax.bar(bar_positions, y, color=col, edgecolor=edgecolor)
             ax.set_xticks(bar_positions)
             ax.set_xticklabels(categories, rotation=xlas * 90)
 
@@ -227,7 +229,8 @@ class CategoricalFDT:
                 for i, val in enumerate(y):
                     ax.text(i, val, f"{round(val, v_round)}", ha="center", va="bottom")
 
-            plt.show()
+            if show:
+                plt.show()
 
         # Helper function for polygon plot
         def plot_p(y, categories):
@@ -248,7 +251,8 @@ class CategoricalFDT:
                 for i, val in enumerate(y):
                     ax.text(i, val, f"{round(val, v_round)}", ha="center", va="bottom")
 
-            plt.show()
+            if show:
+                plt.show()
 
         # Helper function for dotchart
         def plot_d(y, categories):
@@ -269,7 +273,8 @@ class CategoricalFDT:
                 for i, val in enumerate(y):
                     ax.text(val, i, f"{round(val, v_round)}", ha="right")
 
-            plt.show()
+            if show:
+                plt.show()
 
         # Helper function for pareto plot
         def plot_pa(y, cf, cfp, categories):
@@ -278,7 +283,7 @@ class CategoricalFDT:
             bar_positions = np.arange(len(categories))
 
             # Bar plot
-            ax1.bar(bar_positions, y, color=col, edgecolor="black")
+            ax1.bar(bar_positions, y, color=col, edgecolor=edgecolor)
             ax1.set_xticks(bar_positions)
             ax1.set_xticklabels(categories, rotation=xlas * 90)
 
@@ -302,30 +307,31 @@ class CategoricalFDT:
                 0, max(cf) * 1.1
             )  # Ensure y-axis limit for cumulative frequency
 
-            plt.show()
+            if show:
+                plt.show()
 
-        # Call appropriate plot type based on `plot_type` argument
+        # Call appropriate plot type based on `type_` argument
         categories = x["Category"]
-        if plot_type == "fb":
+        if type_ == "fb":
             y = x.iloc[:, 1]
             xlab = xlab or "Category"
             ylab = ylab or "Frequency"
             ylim = ylim or (0, max(y) * 1.3)
             plot_b(y, categories)
 
-        elif plot_type == "fp":
+        elif type_ == "fp":
             y = x.iloc[:, 1]
             xlab = xlab or "Category"
             ylab = ylab or "Frequency"
             ylim = ylim or (0, max(y) * 1.2)
             plot_p(y, categories)
 
-        elif plot_type == "fd":
+        elif type_ == "fd":
             y = x.iloc[:, 1]
             xlab = xlab or "Frequency"
             plot_d(y, categories)
 
-        elif plot_type == "pa":
+        elif type_ == "pa":
             y = x.iloc[:, 1]
             cf = x.iloc[:, 4]  # Cumulative frequency
             cfp = x.iloc[:, 5]  # Cumulative frequency percentage
@@ -335,74 +341,74 @@ class CategoricalFDT:
             ylim = ylim or (0, sum(y) * 1.1)
             plot_pa(y, cf, cfp, categories)
 
-        elif plot_type == "rfb":
+        elif type_ == "rfb":
             y = x.iloc[:, 2]
             xlab = xlab or "Category"
             ylab = ylab or "Relative frequency"
             plot_b(y, categories)
 
-        elif plot_type == "rfp":
+        elif type_ == "rfp":
             y = x.iloc[:, 2]
             xlab = xlab or "Category"
             ylab = ylab or "Relative frequency"
             ylim = ylim or (0, max(y) * 1.2)
             plot_p(y, categories)
 
-        elif plot_type == "rfd":
+        elif type_ == "rfd":
             y = x.iloc[:, 2]
             xlab = xlab or "Relative frequency"
             plot_d(y, categories)
 
-        elif plot_type == "rfpb":
+        elif type_ == "rfpb":
             y = x.iloc[:, 3]
             xlab = xlab or "Category"
             ylab = ylab or "Relative frequency (%)"
             plot_b(y, categories)
 
-        elif plot_type == "rfpp":
+        elif type_ == "rfpp":
             y = x.iloc[:, 3]
             xlab = xlab or "Category"
             ylab = ylab or "Relative frequency (%)"
             ylim = ylim or (0, max(y) * 1.2)
             plot_p(y, categories)
 
-        elif plot_type == "rfpd":
+        elif type_ == "rfpd":
             y = x.iloc[:, 3]
             xlab = xlab or "Relative frequency (%)"
             plot_d(y, categories)
 
-        elif plot_type == "cfb":
+        elif type_ == "cfb":
             y = x.iloc[:, 4]
             xlab = xlab or "Category"
             ylab = ylab or "Cumulative frequency"
             plot_b(y, categories)
 
-        elif plot_type == "cfp":
+        elif type_ == "cfp":
             y = x.iloc[:, 4]
             xlab = xlab or "Category"
             ylab = ylab or "Cumulative frequency"
             ylim = ylim or (0, max(y) * 1.2)
             plot_p(y, categories)
 
-        elif plot_type == "cfd":
+        elif type_ == "cfd":
             y = x.iloc[:, 4]
             xlab = xlab or "Cumulative frequency"
             plot_d(y, categories)
 
-        elif plot_type == "cfpb":
+        elif type_ == "cfpb":
             y = x.iloc[:, 5]
             xlab = xlab or "Category"
             ylab = ylab or "Cumulative frequency (%)"
             plot_b(y, categories)
 
-        elif plot_type == "cfpp":
+        elif type_ == "cfpp":
             y = x.iloc[:, 5]
             xlab = xlab or "Category"
             ylab = ylab or "Cumulative frequency (%)"
             ylim = ylim or (0, max(y) * 1.2)
             plot_p(y, categories)
 
-        elif plot_type == "cfpd":
+        elif type_ == "cfpd":
             y = x.iloc[:, 5]
             xlab = xlab or "Cumulative frequency (%)"
             plot_d(y, categories)
