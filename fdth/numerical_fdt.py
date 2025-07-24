@@ -7,14 +7,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from fdth import FrequencyDistribution
 from .binning import Binning
 
 BinFunc = Callable[[pd.Series], Binning]
 """Type definition for a function that takes a dataset and returns a binning configuration for it."""
 
 
-class NumericalFDT(FrequencyDistribution):
+class NumericalFDT:
     """Stores information about a numerical frequency distribution, and provides relevant operations."""
 
     table: pd.DataFrame
@@ -238,7 +237,7 @@ class NumericalFDT(FrequencyDistribution):
         class_round: Optional[int],
     ) -> tuple[pd.DataFrame, np.ndarray]:
         freqs = pd.cut(
-            data.to_numpy(), # XXX: converting it to numpy makes the order work. Why?
+            data.to_numpy(),  # XXX: converting it to numpy makes the order work. Why?
             bins=binning.bins,
             right=right,
         ).value_counts()

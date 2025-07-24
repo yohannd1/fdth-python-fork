@@ -41,14 +41,20 @@ def fdt(
     elif data is None and freqs is not None:
         if isinstance(freqs, pd.Series | list):
             if kind is not None and kind != "numerical":
-                raise TypeError("`freqs` (as pandas.Series | list) can only be used with `numerical` type FDTs")
+                raise TypeError(
+                    "`freqs` (as pandas.Series | list) can only be used with `numerical` type FDTs"
+                )
             return NumericalFDT(freqs=freqs, **kwargs)
         elif isinstance(freqs, dict):
             if kind is not None and kind != "categorical":
-                raise TypeError("`freqs` (as dict) can only be used with `categorical` type FDTs")
+                raise TypeError(
+                    "`freqs` (as dict) can only be used with `categorical` type FDTs"
+                )
             return CategoricalFDT(freqs=freqs, **kwargs)
         else:
-            raise TypeError("`freqs` must be pandas.Series | list | dict when specified")
+            raise TypeError(
+                "`freqs` must be pandas.Series | list | dict when specified"
+            )
     else:
         raise TypeError(
             "`data` must be list | pandas.Series | pandas.DataFrame | numpy.ndarray, or `freqs` must be specified"

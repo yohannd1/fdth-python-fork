@@ -6,7 +6,6 @@ import numpy as np
 from .utils import deduce_fdt_kind
 from .numerical_fdt import NumericalFDT
 from .categorical_fdt import CategoricalFDT
-from .frequency_distribution import FrequencyDistribution
 
 
 class MultipleFDT:
@@ -23,27 +22,37 @@ class MultipleFDT:
         else:
             raise TypeError("data must be pandas.DataFrame | numpy.ndarray")
 
-        self.fdts_by_column = {k: self._auto_fdt(v, **kwargs) for (k, v) in self._data.items()}
+        self.fdts_by_column = {
+            k: self._auto_fdt(v, **kwargs) for (k, v) in self._data.items()
+        }
         """A dictionary with the individual FDT objects for each column."""
 
         self.fdts_by_index = [self.fdts_by_column[k] for (k, _) in self._data.items()]
         """A list with the individual FDT objects for each column index."""
 
-    def get_fdt(self, column: Any = None, index: Optional[int] = None) -> FrequencyDistribution:
+    def get_fdt(
+        self, column: Any = None, index: Optional[int] = None
+    ) -> NumericalFDT | CategoricalFDT:
         if column is not None and index is not None:
-            raise ValueError("both `column` and `index` were specified - specify exactly one")
+            raise ValueError(
+                "both `column` and `index` were specified - specify exactly one"
+            )
         elif column is not None:
             return self.fdts_by_column[column]
         elif index is not None:
             return self.fdts_by_index[index]
         else:
-            raise ValueError("neither `column` nor `index` were specified - specify exactly one")
+            raise ValueError(
+                "neither `column` nor `index` were specified - specify exactly one"
+            )
 
-    def get_table(self, column: Any = None, index: Optional[int] = None) -> pd.DataFrame:
+    def get_table(
+        self, column: Any = None, index: Optional[int] = None
+    ) -> pd.DataFrame:
         return self.get_fdt(column, index).get_table()
 
     @staticmethod
-    def _auto_fdt(data: pd.Series, **kwargs) -> FrequencyDistribution:
+    def _auto_fdt(data: pd.Series, **kwargs) -> NumericalFDT | CategoricalFDT:
         kind = deduce_fdt_kind(data)
         if kind == "categorical":
             return CategoricalFDT(data, **kwargs)

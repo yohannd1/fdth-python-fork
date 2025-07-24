@@ -39,7 +39,6 @@ print(fd.get_fdt("categorical").__class__) # CategoricalFDT
 See the `examples/` folder for more usage examples.
 """
 
-from .frequency_distribution import FrequencyDistribution
 from .numerical_fdt import NumericalFDT
 from .categorical_fdt import CategoricalFDT
 from .multiple_fdt import MultipleFDT

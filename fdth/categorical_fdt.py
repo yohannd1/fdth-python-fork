@@ -5,10 +5,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from fdth import FrequencyDistribution
 
-
-class CategoricalFDT(FrequencyDistribution):
+class CategoricalFDT:
     """Stores information about a categorical frequency distribution, and provides relevant operations."""
 
     table: pd.DataFrame

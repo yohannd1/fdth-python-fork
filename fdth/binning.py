@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import pandas as pd
 import numpy as np
 
+
 @dataclass(frozen=True)
 class Binning:
     """Class for storing information about binning for numerical FDTs."""
@@ -36,7 +37,6 @@ class Binning:
         no_none = lambda *x: all(xi is not None for xi in x)
 
         def inner(data, start, end, h, k) -> Binning:
-            # TODO: figure out if I translated this right
             if all_none(start, end, h, k):
                 raise ValueError("at least one of the arguments must be specified")
             elif h is None and k is not None:
@@ -45,13 +45,24 @@ class Binning:
                 r = end - start
                 k = int(np.sqrt(abs(r)))
                 return Binning.linspace(k=max(k, 5), start=start, end=end)
+            elif no_none(start, end, h) and k is None:
+                # XXX: forcing h to potentially be a different value, as in to
+                # maintain consistency, but if it is correct it won't be
+                # changed
+                k = np.ceil((end - start) / h)
+                return Binning.linspace(k=k, start=start, end=end)
             else:
-                raise NotImplementedError("TODO")
+                raise ValueError("invalid arguments for auto")
 
         return lambda data: inner(data, start, end, h, k)
 
     @staticmethod
-    def linspace(k: int, data: Optional[pd.Series] = None, start: Optional[float] = None, end: Optional[float] = None) -> Binning:
+    def linspace(
+        k: int,
+        data: Optional[pd.Series] = None,
+        start: Optional[float] = None,
+        end: Optional[float] = None,
+    ) -> Binning:
         """Linear binning, dividing the entire range into `k` equal spaces."""
         start = start if start is not None else data.min() - abs(data.min()) / 100
         end = end if end is not None else data.max() + abs(data.max()) / 100
