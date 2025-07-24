@@ -16,7 +16,6 @@ class Test(unittest.TestCase):
         _ = fd.mean()
         _ = fd.median()
         _ = fd.var()
-        fd.plot_histogram()
 
     def test_categorical_fdt(self):
         data = ["a", "b", "a", "c", "c"]
@@ -24,7 +23,6 @@ class Test(unittest.TestCase):
         assert isinstance(fd, CategoricalFDT)
 
         _ = fd.get_table()
-        fd.plot_histogram()
 
     def test_categorical_fdt_mixed(self):
         data = [1, 5, "b"]
@@ -37,7 +35,6 @@ class Test(unittest.TestCase):
         assert isinstance(fd, CategoricalFDT)
 
         _ = fd.get_table()
-        fd.plot_histogram()
 
     def test_dataframe_fdt(self):
         df = pd.DataFrame({

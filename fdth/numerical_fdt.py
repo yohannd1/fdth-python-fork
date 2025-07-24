@@ -11,7 +11,7 @@ from fdth import FrequencyDistribution
 BinMode = Literal["Sturges", "Scott", "FD"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class BreaksInfo:
     start: float
     end: float
@@ -89,24 +89,23 @@ class NumericalFDT(FrequencyDistribution):
             raise ValueError("one of `data` or `table` must be specified")
 
     @lru_cache
-    def mean(self) -> float:
-        """Calculate an approximate of the mean of the data represented by the FDT."""
-
+    def _breaks(self) -> np.ndarray:
+        # FIXME: can we replace this with "bins"?
         start = self.breaks_info.start
         end = self.breaks_info.end
         h = self.breaks_info.h
+        return np.arange(start, end + h, h)
 
-        # define class interval
-        breaks = np.arange(start, end + h, h)
+    @lru_cache
+    def _midpoints(self) -> np.ndarray:
+        """Calculate the midpoints of the class intervals."""
+        breaks = self._breaks()
+        return 0.5 * (breaks[:-1] + breaks[1:])
 
-        # calculate midpoints of the class intervals
-        midpoints = 0.5 * (breaks[:-1] + breaks[1:])
-
-        # frequencies of each class
-        y = self.table.loc[:, "f"]
-
-        # return the weighted mean of the midpoints
-        return np.sum(y * midpoints) / np.sum(y)
+    @lru_cache
+    def mean(self) -> float:
+        """Calculate an approximate of the mean of the data represented by the FDT."""
+        return np.sum(self.table["f"] * self._midpoints()) / self.count
 
     @lru_cache
     def at(self) -> float:
@@ -115,7 +114,7 @@ class NumericalFDT(FrequencyDistribution):
         return self.breaks_info.end - self.breaks_info.start
 
     @staticmethod
-    def quantile_to_percentile(x: float) -> str:
+    def fmt_percentile(x: float) -> str:
         return f"{x * 100:.2f}%"
 
     def quantiles(
@@ -129,8 +128,7 @@ class NumericalFDT(FrequencyDistribution):
         :param bins: array of values between 0 and 1
         :param fmt_fn: function that maps the quantile number to a representation in the result. Defaults to percentile formatting.
         """
-        if fmt_fn is None:
-            fmt_fn = self.quantile_to_percentile
+        fmt_fn = fmt_fn if fmt_fn is not None else self.fmt_percentile
         return pd.Series({fmt_fn(b): self.quantile(b) for b in bins})
 
     def quantile(self, pos: float) -> float:
@@ -140,29 +138,29 @@ class NumericalFDT(FrequencyDistribution):
         :param pos: position of the quantile - must be between 0 and 1.
         """
         if not (0.0 <= pos <= 1.0):
-            raise ValueError(f"quantile position {pos} out of range - must be in [0, 1]")
+            raise ValueError(
+                f"quantile position {pos} out of range - must be in [0, 1]"
+            )
 
-        start = self.breaks_info.start
-        end = self.breaks_info.end
-        h = self.breaks_info.h
-
+        # calculate "position" where the desired class will be
         pos_count = self.count * pos
 
-        # Posição da classe mediana
-        pos_m = np.where(pos_count <= self.table.iloc[:, 4])[0][0]
+        # get quantile index
+        idx = np.where(pos_count <= self.table["cf"])[0][0]
 
-        breaks = np.arange(start, end + h, h)
+        breaks = self._breaks()
+        h = self.breaks_info.h
 
-        # Limite inferior da classe mediana
-        li_m = breaks[pos_m]
+        # quantile class lower limit
+        ll = breaks[idx]
 
-        # Frequência acumulada anterior à classe mediana
-        sfa_m = self.table.iloc[pos_m - 1, 4] if pos_m >= 1 else 0
+        # cumulative frequency of the previous class
+        cf_prev = 0 if idx < 1 else self.table.iloc[idx - 1, 4]
 
-        # Frequência da classe mediana
-        f_m = self.table.iloc[pos_m, 1]
+        # frequency of the quantile class
+        f_q = self.table.iloc[idx, 1]
 
-        return li_m + ((pos_count - sfa_m) * h) / f_m
+        return ll + ((pos_count - cf_prev) * h) / f_q
 
     @lru_cache
     def median(self) -> float:
@@ -172,21 +170,7 @@ class NumericalFDT(FrequencyDistribution):
     @lru_cache
     def var(self) -> float:
         """Calculate an approximate of the variance of the data represented by the FDT."""
-
-        start = self.breaks_info.start
-        end = self.breaks_info.end
-        h = self.breaks_info.h
-
-        # Definir intervalos de classe com base nos valores 'start', 'end' e 'h'
-        breaks = np.arange(start, end + h, h)
-
-        # Calcular pontos médios dos intervalos de classe
-        midpoints = 0.5 * (breaks[:-1] + breaks[1:])
-
-        # Frequências das classes
-        y = self.table.loc[:, "f"]
-
-        return np.sum((midpoints - self.mean()) ** 2 * y) / (np.sum(y) - 1)
+        return np.sum((self._midpoints() - self.mean()) ** 2 * self.table["f"]) / (self.count - 1)
 
     @lru_cache
     def sd(self) -> float:
@@ -221,12 +205,7 @@ class NumericalFDT(FrequencyDistribution):
     def get_table(self) -> pd.DataFrame:
         return self.table
 
-    def plot_histogram(self) -> None:
-        # FIXME: whoops. I think I (yohanan) messed this up
-        plt.hist(self.table, bins=self.breaks_info.bins, edgecolor="black")
-        plt.title("Histograma")
-        plt.xlabel("Valor")
-        plt.ylabel("Frequência")
+    # TODO: `plot()` method
 
     def to_string(
         self,
@@ -257,7 +236,14 @@ class NumericalFDT(FrequencyDistribution):
 
     @staticmethod
     def _fdt_numeric_simple(
-        data, k, start, end, h, breaks: BinMode, right, na_rm
+        data: pd.Series,
+        k: int | None = None,
+        start: float | None = None,
+        end: float | None = None,
+        h: float | None = None,
+        breaks: BinMode = "Sturges",
+        right: bool = False,
+        na_rm: bool = False,
     ) -> tuple[pd.DataFrame, BreaksInfo]:
         data = np.array([np.nan if v is None else v for v in data], dtype=np.float64)
 
@@ -269,25 +255,22 @@ class NumericalFDT(FrequencyDistribution):
         elif np.any(np.isnan(data)):
             raise ValueError("The data has <NA> values and na.rm=FALSE by default.")
 
-        # Bin calculation based on specified method
+        n = len(data)
+
+        # calculate bins based on the specified method
         if k is None and start is None and end is None and h is None:
             if breaks == "Sturges":
-                k = int(np.ceil(1 + 3.322 * np.log10(len(data))))
+                k = int(np.ceil(1 + 3.322 * np.log10(n)))
             elif breaks == "Scott":
                 std_dev = np.std(data)
                 k = int(
                     np.ceil(
-                        (data.max() - data.min())
-                        / (3.5 * std_dev / (len(data) ** (1 / 3)))
+                        (data.max() - data.min()) / (3.5 * std_dev / (n ** (1 / 3)))
                     )
                 )
             elif breaks == "FD":
                 iqr = np.percentile(data, 75) - np.percentile(data, 25)
-                k = int(
-                    np.ceil(
-                        (data.max() - data.min()) / (2 * iqr / (len(data) ** (1 / 3)))
-                    )
-                )
+                k = int(np.ceil((data.max() - data.min()) / (2 * iqr / (n ** (1 / 3)))))
             else:
                 raise ValueError("Invalid 'breaks' method.")
 
@@ -318,8 +301,15 @@ class NumericalFDT(FrequencyDistribution):
         else:
             raise ValueError("Please check the function syntax!")
 
-        # Generate the frequency distribution table
-        table, bins = NumericalFDT._make_fdt_simple(data, start, end, h, right)
+        # generate the frequency distribution table
+        table, bins = NumericalFDT._make_fdt_simple(
+            data=data,
+            start=start,
+            end=end,
+            h=h,
+            right=right,
+            class_round=2, # FIXME: receive this as a parameter
+        )
 
         breaks_info = BreaksInfo(
             start=start,
@@ -334,7 +324,12 @@ class NumericalFDT(FrequencyDistribution):
 
     @staticmethod
     def _make_fdt_simple(
-        data: pd.Series, start: float, end: float, h: float, right: bool = False
+        data: pd.Series,
+        start: float,
+        end: float,
+        h: float,
+        right: bool,
+        class_round: Optional[int],
     ) -> pd.DataFrame:
         """
         Create a simple frequency distribution table.
@@ -348,8 +343,12 @@ class NumericalFDT(FrequencyDistribution):
         :return a frequency distribution table with class limits, frequencies, relative frequencies, cumulative frequencies, and cumulative percentages.
         """
         bins = np.arange(start, end + h, h)
+
+        # TODO: zip(np.round(self.bins[:-1], 2), np.round(self.bins[1:], 2))
+
+        r = class_round if class_round is not None else 2
         labels = [
-            f"[{round(bins[i], 2)}, {round(bins[i + 1], 2)})"
+            f"[{round(bins[i], r)}, {round(bins[i + 1], r)})"
             for i in range(len(bins) - 1)
         ]
         f = pd.cut(data, bins=bins, right=right, labels=labels).value_counts()

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from fdth import fdt, NumericalFDT
 
 class Test(unittest.TestCase):
-    def test_categorical_fdt(self):
+    def test_numerical_fdt(self):
         data = [1, 2, 6, 8, 10]
         fd = fdt(data)
         assert isinstance(fd, NumericalFDT)
@@ -28,9 +28,6 @@ class Test(unittest.TestCase):
         # variância
         var_value = fd.var()
         assert isinstance(var_value, float)
-
-        # histograma
-        fd.plot_histogram()
 
         # testa o __repr__
         repr_output = repr(fd)
