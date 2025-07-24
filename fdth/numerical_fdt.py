@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Sequence, Any, Callable
+from typing import Optional, Sequence, Any, Callable, cast
 from functools import lru_cache
 
 import pandas as pd
@@ -114,7 +114,7 @@ class NumericalFDT:
 
     def quantiles(
         self,
-        bins: Sequence[float] = np.arange(0.0, 1.0, 0.1),
+        bins: Sequence[float] | Any = np.arange(0.0, 1.0, 0.1),
         fmt_fn: Callable[[float], str] | None = None,
     ) -> pd.Series:
         """
@@ -178,7 +178,7 @@ class NumericalFDT:
     def mfv(self) -> pd.Series:
         """Calculate an approximation of the most frequent values (modes) of the data set."""
 
-        freqs = self.table["f"].values
+        freqs = self.table["f"].to_numpy()
         bins = self.binning.bins
         h = self.binning.h
 
@@ -239,8 +239,8 @@ class NumericalFDT:
         round_: int,
     ) -> pd.DataFrame:
         freqs = pd.cut(
-            data.to_numpy(),  # XXX: converting it to numpy makes the order work. Why?
-            bins=binning.bins,
+            data.to_numpy(),
+            bins=cast(Sequence[float], binning.bins),
             right=right,
         ).value_counts()
 
@@ -273,7 +273,5 @@ class NumericalFDT:
             "cf": cf.values,
             "cf(%)": cfp.values,
         }) # fmt: skip
-
-        table.index = np.arange(1, len(table) + 1)  # FIXME: do we need this?
 
         return table

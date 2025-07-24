@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 import numpy as np
+from numpy.typing import NDArray
 
 
 @dataclass(frozen=True)
@@ -23,7 +24,7 @@ class Binning:
     k: int
     """The total amount of bins."""
 
-    bins: np.ndarray
+    bins: NDArray
     """An array with the start of each bin."""
 
     @staticmethod

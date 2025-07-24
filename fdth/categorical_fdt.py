@@ -71,7 +71,7 @@ class CategoricalFDT:
     @lru_cache
     def mfv(self) -> pd.Series:
         """Returns the most frequent values (modes) of the data set."""
-        freqs = self.table["f"].values
+        freqs = self.table["f"].to_numpy()
         positions = np.where(freqs == freqs.max())[0]
         return pd.Series(self.table["Category"][i] for i in positions)
 
