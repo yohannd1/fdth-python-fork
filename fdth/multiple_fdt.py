@@ -2,6 +2,7 @@ from typing import Optional, Any
 
 import pandas as pd
 import numpy as np
+from numpy.typing import NDArray
 
 from .utils import deduce_fdt_kind
 from .numerical_fdt import NumericalFDT
@@ -11,10 +12,18 @@ from .categorical_fdt import CategoricalFDT
 class MultipleFDT:
     """Contains FDTs of all columns in a data set (table or matrix)."""
 
-    def __init__(self, data: pd.DataFrame | np.ndarray, **kwargs) -> None:
-        # TODO: doc
-        # TODO: arg for selecting only numeric or categorical columns (might use `df.select_dtypes(include=["category", "object"]).columns`)
+    fdts_by_column: dict[Any, NumericalFDT | CategoricalFDT]
+    """A dictionary with the individual FDT objects for each column."""
 
+    fdts_by_index: list[NumericalFDT | CategoricalFDT]
+    """A list with the individual FDT objects for each column index."""
+
+    def __init__(self, data: pd.DataFrame | NDArray, **kwargs) -> None:
+        """
+        Create a MultipleFDT based on tabular data (a dataframe or 2-dimensional array).
+
+        :param kwargs: forwarded to each NumericalFDT and CategoricalFDT - one per column in `data`.
+        """
         if isinstance(data, pd.DataFrame):
             self._data = data
         elif isinstance(data, np.ndarray):
@@ -25,13 +34,13 @@ class MultipleFDT:
         self.fdts_by_column = {
             k: self._auto_fdt(v, **kwargs) for (k, v) in self._data.items()
         }
-        """A dictionary with the individual FDT objects for each column."""
 
         self.fdts_by_index = [self.fdts_by_column[k] for (k, _) in self._data.items()]
-        """A list with the individual FDT objects for each column index."""
 
     def get_fdt(
-        self, column: Any = None, index: Optional[int] = None
+        self,
+        column: Any = None,
+        index: Optional[int] = None,
     ) -> NumericalFDT | CategoricalFDT:
         if column is not None and index is not None:
             raise ValueError(
@@ -47,7 +56,9 @@ class MultipleFDT:
             )
 
     def get_table(
-        self, column: Any = None, index: Optional[int] = None
+        self,
+        column: Any = None,
+        index: Optional[int] = None,
     ) -> pd.DataFrame:
         return self.get_fdt(column, index).get_table()
 

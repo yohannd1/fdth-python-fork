@@ -45,7 +45,9 @@ class CategoricalFDT:
 
             data = pd.Series(data).astype("category")
 
-            self.count, self.table = self._make_table_from_data(data, sort=sort, decreasing=decreasing)
+            self.count, self.table = self._make_table_from_data(
+                data, sort=sort, decreasing=decreasing
+            )
         elif freqs is not None:
             if data is not None:
                 raise ValueError("`data` and `freqs` must not be both specified")
@@ -108,12 +110,6 @@ class CategoricalFDT:
         data: pd.Series, sort: bool, decreasing: bool
     ) -> tuple[int, pd.DataFrame]:
         """Create a frequency distribution table (FDT) for a set of categorical data."""
-
-        # FIXME: is this needed? it would make using numbered categories impossible
-        # if data.dtypes.name not in {"object", "category"}:
-        #     raise ValueError(f"values must be strings or categorical (got {data.dtypes.name}).")
-
-        count = len(data)
 
         # Convert data set to categorical type
         data = data.astype("category")

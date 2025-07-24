@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from .binning import Binning
 
-BinFunc = Callable[[pd.Series[float]], Binning]
+BinFunc = Callable[["pd.Series[float]"], Binning]
 """Type definition for a function that takes a dataset and returns a binning configuration for it."""
 
 
@@ -77,7 +77,9 @@ class NumericalFDT:
             self.binning = binning
 
     @staticmethod
-    def _cleanup_data(data: pd.Series[float] | Sequence[float], remove_nan: bool) -> pd.Series[float]:
+    def _cleanup_data(
+        data: pd.Series[float] | Sequence[float], remove_nan: bool
+    ) -> pd.Series[float]:
         d = np.array([np.nan if v is None else v for v in data], dtype=np.float64)
         if not np.issubdtype(d.dtype, np.number):
             raise ValueError("input data must be numeric")
