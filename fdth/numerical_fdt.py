@@ -202,7 +202,126 @@ class NumericalFDT:
     def get_table(self) -> pd.DataFrame:
         return self.table
 
-    # TODO: `plot()` method
+    def plot(
+        self,
+        type_: str = "fh",
+        v: bool = False,
+        v_round: int = 2,
+        v_pos: int = 3,
+        xlab: str = "Class limits",
+        xlas: int = 0,
+        ylab: Optional[str] = None,
+        color: str = "gray",
+        xlim: Optional[tuple[float, float]] = None,
+        ylim: Optional[tuple[float, float]] = None,
+        main: Optional[str] = None,
+        edgecolor: str = "black",
+        linewidth: int = 1,
+        x_round: int = 2,
+        show: bool = True,
+        **kwargs,
+    ) -> None:
+        """
+        Make one of a collection of plots.
+
+        Supported plots:
+        - `fh`: TODO;
+        - `fp`: TODO;
+        - `rfh`: TODO;
+        - `rfp`: TODO;
+        - `rfph`: TODO;
+        - `rfpp`: TODO;
+        - `d`: TODO;
+        - `cdh`: TODO;
+        - `cdp`: TODO;
+        - `cfh`: TODO;
+        - `cfp`: TODO;
+        - `cfph`: TODO;
+        - `cfpp`: TODO.
+
+        :param kwargs: forwarded to the various plot functions;
+        :param type_: type of plot to generate.
+        :param v: if True, display values on the plot.
+        :param v_round: decimal places for values displayed on the plot.
+        :param v_pos: vertical position for value labels.
+        :param xlab: label for the x-axis.
+        :param xlas: rotation angle for x-axis labels. Defaults to 0.
+        :param ylab: label for the y-axis.
+        :param y2lab: label for the secondary y-axis (used in Pareto plot).
+        :param y2cfp: percentage ticks for cumulative frequency y-axis in Pareto plot.
+        :param col: color for plot elements. Default is '0.4' (gray).
+        """
+
+        bins = self.binning.bins
+
+        if xlim is None:
+            xlim = (self.binning.start, self.binning.end)
+
+        mids = self._midpoints()
+
+        if type_ == "fh":
+            y = self.table["f"].to_numpy()
+
+            if ylim is None:
+                ylim = (0, y.max())
+
+            if ylab is None:
+                ylab = "Frequency"
+
+            fig, ax = plt.subplots()
+            ax.set_xlim(xlim)
+            ax.set_ylim(ylim)
+            ax.set_title(main)
+            ax.set_xlabel(xlab)
+            ax.set_ylabel(ylab)
+            ax.set_xticks(bins)
+
+            ax.bar(
+                x=mids,
+                height=y,
+                width=self.binning.h,
+                edgecolor=edgecolor,
+                linewidth=1,
+                color=color,
+                **kwargs,
+            )
+
+            if v:
+                plt.text(
+                    mids,
+                    y,
+                    [f"{val:.{v_round}f}" for val in y],
+                    va="bottom",
+                    ha="center",
+                    **kwargs,
+                )
+
+            if show:
+                plt.show()
+        elif type_ == "fp":
+            raise NotImplementedError("TODO")
+        elif type_ == "rfh":
+            raise NotImplementedError("TODO")
+        elif type_ == "rfp":
+            raise NotImplementedError("TODO")
+        elif type_ == "rfph":
+            raise NotImplementedError("TODO")
+        elif type_ == "rfpp":
+            raise NotImplementedError("TODO")
+        elif type_ == "d":
+            raise NotImplementedError("TODO")
+        elif type_ == "cdh":
+            raise NotImplementedError("TODO")
+        elif type_ == "cdp":
+            raise NotImplementedError("TODO")
+        elif type_ == "cfh":
+            raise NotImplementedError("TODO")
+        elif type_ == "cfp":
+            raise NotImplementedError("TODO")
+        elif type_ == "cfph":
+            raise NotImplementedError("TODO")
+        elif type_ == "cfpp":
+            raise NotImplementedError("TODO")
 
     def to_string(
         self,
