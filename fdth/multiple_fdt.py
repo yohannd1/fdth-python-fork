@@ -62,7 +62,7 @@ class MultipleFDT:
             raise TypeError(f"unexpected kind: {repr(kind)}")
 
     def __repr__(self) -> str:
-        res = f"MultipleFDT ({len(self.fdts)} tables):\n\n"
+        res = f"MultipleFDT ({len(self.fdts_by_index)} tables):\n\n"
         for k, v in self.fdts_by_column.items():
             res += f"{k}: {v}\n\n"
         return res

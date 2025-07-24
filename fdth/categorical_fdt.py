@@ -35,27 +35,17 @@ class CategoricalFDT:
 
         :param data: a data set of which the frequency must be analyzed
         :param freqs: a pandas.Series with the value at a specific index being the absolute frequency of said category, or a dict with the key being a category and the value being the frequency
-        :param sort: TODO
-        :param decreasing: TODO
+        :param sort: whether to sort the categories
+        :param decreasing: (when sort is True) whether to sort the categories in decreasing order
         """
 
         if data is not None:
             if freqs is not None:
                 raise ValueError("`data` and `freqs` must not be both specified")
 
-            if isinstance(data, list):
-                data = pd.Series(data)
-            elif isinstance(data, pd.Series):
-                pass
-            else:
-                raise TypeError("`data` must be list | pandas.Series")
+            data = pd.Series(data).astype("category")
 
-            # FIXME: don't save this in the class!
-            self._data = data.astype("category")
-
-            self.count, self.table = self._make_table_from_data(
-                data, sort=sort, decreasing=decreasing
-            )
+            self.count, self.table = self._make_table_from_data(data, sort=sort, decreasing=decreasing)
         elif freqs is not None:
             if data is not None:
                 raise ValueError("`data` and `freqs` must not be both specified")
@@ -76,24 +66,12 @@ class CategoricalFDT:
     def get_table(self) -> pd.DataFrame:
         return self.table
 
-    def plot_histogram(self) -> None:
-        category_counts = pd.Series(self._data).value_counts()
-
-        # plotar o gráfico de barras
-        category_counts.plot(kind="bar", color="skyblue", edgecolor="black")
-
-        # definir título e rótulos
-        plt.title("Histograma de Dados Categóricos")
-        plt.xlabel("Categorias")
-        plt.ylabel("Frequência")
-
-        # rotacionar os rótulos das categorias para ficarem legíveis
-        plt.xticks(rotation=0)
-
     @lru_cache
     def mfv(self) -> pd.Series:
         """Returns the most frequent values (modes) of the data set."""
-        return self._data.mode().iloc[0:]
+        freqs = self.table["f"].values
+        positions = np.where(freqs == freqs.max())[0]
+        return pd.Series(self.table["Category"][i] for i in positions)
 
     @staticmethod
     def _make_table_from_frequencies(
@@ -191,7 +169,7 @@ class CategoricalFDT:
         y2lab: Optional[str] = None,
         y2cfp=np.arange(0, 101, 25),
         col: str = "0.4",
-        xlim: Optional[tuple[float, float]] = None,  # FIXME: unused?
+        xlim: Optional[tuple[float, float]] = None,
         ylim: Optional[tuple[float, float]] = None,
         main: Optional[str] = None,
         box: bool = False,

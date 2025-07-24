@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Callable
 from dataclasses import dataclass
 
 import pandas as pd
@@ -64,8 +64,14 @@ class Binning:
         end: Optional[float] = None,
     ) -> Binning:
         """Linear binning, dividing the entire range into `k` equal spaces."""
-        start = start if start is not None else data.min() - abs(data.min()) / 100
-        end = end if end is not None else data.max() + abs(data.max()) / 100
+        if start is None:
+            if data is None:
+                raise ValueError("`data` is None when `start` was not specified")
+            start = data.min() - abs(data.min()) / 100
+        if end is None:
+            if data is None:
+                raise ValueError("`data` is None when `end` was not specified")
+            end = data.max() + abs(data.max()) / 100
         h = (end - start) / k
         bins = np.arange(start, end + h, h)
         return Binning(k=k, start=start, end=end, h=h, bins=bins)

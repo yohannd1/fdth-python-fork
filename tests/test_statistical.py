@@ -45,6 +45,7 @@ class Test(unittest.TestCase):
             assert all(calculated_mfv == expected_mfv)
 
         mfv_and_compare(["a", "b", "b", "c"], ["b"])
+        mfv_and_compare(["a", "b", "b", "c", "c"], ["b", "c"])
         self.assertClose(fdt([0, 1, 1, 2, 2, 3]).mfv()[0], 1.515, atol=0.4)
 
     def test_at(self):

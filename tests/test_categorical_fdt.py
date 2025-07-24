@@ -16,9 +16,6 @@ class Test(unittest.TestCase):
         assert isinstance(fd.table, pd.DataFrame)
         assert not fd.table.empty
 
-        # plotar histograma
-        fd.plot_histogram()
-
         # testa o __repr__
         repr_output = repr(fd)
         assert isinstance(repr_output, str)
