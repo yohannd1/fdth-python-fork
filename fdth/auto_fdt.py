@@ -35,9 +35,9 @@ def fdt(
         if data.ndim == 1:
             data_ = pd.Series(data)
         else:
-            return MultipleFDT(data)
+            return MultipleFDT(data, **kwargs)
     elif isinstance(data, pd.DataFrame):
-        return MultipleFDT(data)
+        return MultipleFDT(data, **kwargs)
     elif data is None and freqs is not None:
         if isinstance(freqs, pd.Series | list):
             if kind is not None and kind != "numerical":

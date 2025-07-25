@@ -382,7 +382,7 @@ class NumericalFDT:
 
         # filter by columns if any were specified
         if columns is not None:
-            table = pd.concat([table["Class limits"], table[columns]], axis="columns")
+            table = table[columns]
 
         # round the numbers in the table
         table = table.round(round)

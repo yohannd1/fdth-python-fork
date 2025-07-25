@@ -53,7 +53,7 @@ class Binning:
                 k = np.ceil((end - start) / h)
                 return Binning.linspace(k=k, start=start, end=end)
             else:
-                raise ValueError("invalid arguments for auto")
+                raise ValueError("`h` and `k` must not be both specified")
 
         return lambda data: inner(data, start, end, h, k)
 
