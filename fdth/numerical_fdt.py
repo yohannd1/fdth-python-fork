@@ -293,15 +293,8 @@ class NumericalFDT:
             )
 
             if v:
-                # FIXME: this doesn't seem to work
-                plt.text(
-                    mids,
-                    y,
-                    [f"{val:.{v_round}f}" for val in y],
-                    va="bottom",
-                    ha="center",
-                    **kwargs,
-                )
+                for xpos, ypos in zip(mids, y):
+                    ax.text(xpos, ypos, f"{ypos:.{v_round}f}", va="bottom", ha="center", **kwargs)
 
             if show:
                 plt.show()
@@ -326,15 +319,8 @@ class NumericalFDT:
             ax.plot(mids, y, "o-", color=color, **kwargs)
 
             if v:
-                # FIXME: this doesn't seem to work
-                plt.text(
-                    mids,
-                    y,
-                    [f"{val:.{v_round}f}" for val in y],
-                    va="bottom",
-                    ha="center",
-                    **kwargs,
-                )
+                for xpos, ypos in zip(mids, y):
+                    ax.text(xpos, ypos, f"{ypos:.{v_round}f}", va="bottom", ha="center", **kwargs)
 
             if show:
                 plt.show()
