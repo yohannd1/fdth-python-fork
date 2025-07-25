@@ -1,4 +1,4 @@
-from fdth.print_fdt_cat_default import print_fdt_cat_default
+from fdth import print_fdt_cat_default
 from fdth import fdt
 
 # Exemplo de uso: vetor categórico

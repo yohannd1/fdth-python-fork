@@ -1,6 +1,6 @@
 import pandas as pd
-from fdth.fdt_cat_data_frame import fdt_cat_data_frame  # Supondo que este módulo já está implementado.
-from fdth.plot_fdt_cat_default import plot_fdt_cat  # Supondo que este módulo já está implementado.
+from fdth import fdt  
+from fdth import plot_fdt_cat  
 
 # Dados de exemplo corrigidos
 data = {
@@ -14,11 +14,8 @@ data = {
 
 df = pd.DataFrame(data)
 
-# Gerar a tabela de frequência utilizando o método fdt_cat_data_frame
-fdt_result = fdt_cat_data_frame(df, sort=True, decreasing=True)
-
-# Obter o primeiro resultado do FDTResultMultiple
-fdt_df = list(fdt_result.results.values())[0]
+fdt_result = fdt(df, sort=True, decreasing=True)
+fdt_df = fdt_result.fdts["Category"]
 
 # Plotar o gráfico para um tipo específico
 types = ['fb', 'fp', 'fd', 'rfb', 'rfp', 'rfd', 'rfpb', 'rfpp', 'rfpd', 

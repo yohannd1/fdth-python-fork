@@ -1,5 +1,5 @@
 import pandas as pd
-from fdth.make_fdt_cat_multiple import make_fdt_cat_multiple
+from fdth import fdt
 
 # Test Data 1
 data = {
@@ -12,7 +12,7 @@ df["col1"] = df["col1"].astype("category")
 df["col2"] = df["col2"].astype("category")
 
 # Execute Test 1
-result = make_fdt_cat_multiple(df, sort=True, decreasing=True)
+result = fdt(df, sort=True, decreasing=True)
 print(result)
 
 # Test Data 2
@@ -27,7 +27,7 @@ df["col1"] = df["col1"].astype("category")
 df["col2"] = df["col2"].astype("category")
 
 # Execute Test 2
-result = make_fdt_cat_multiple(df, sort=False, decreasing=False)
+result = fdt(df, sort=False, decreasing=False)
 print(result)
 
 # Test Data 3
@@ -43,5 +43,5 @@ df["col2"] = df["col2"].astype("category")
 df["col3"] = df["col3"].astype("category")
 
 # Execute Test 3
-result = make_fdt_cat_multiple(df, sort=True, decreasing=False)
+result = fdt(df, sort=True, decreasing=False)
 print(result)
