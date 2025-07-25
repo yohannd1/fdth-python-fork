@@ -237,7 +237,7 @@ class NumericalFDT:
         - `cfh`: cumulative frequency histogram;
         - `cfp`: cumulative frequency polygon;
         - `cfph`: cumulative frequency (%) histogram;
-        - `cfph`: cumulative frequency (%) polygon.
+        - `cfpp`: cumulative frequency (%) polygon.
 
         :param kwargs: forwarded to the various plot functions;
         :param type_: type of plot to generate.
