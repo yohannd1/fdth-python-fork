@@ -227,17 +227,17 @@ class NumericalFDT:
         Supported plots:
         - `fh`: absolute frequency histogram;
         - `fp`: absolute frequency polygon;
-        - `rfh`: TODO;
-        - `rfp`: TODO;
-        - `rfph`: TODO;
-        - `rfpp`: TODO;
-        - `d`: TODO;
-        - `cdh`: TODO;
-        - `cdp`: TODO;
-        - `cfh`: TODO;
-        - `cfp`: TODO;
-        - `cfph`: TODO;
-        - `cfpp`: TODO.
+        - `rfh`: relative frequency histogram;
+        - `rfp`: relative frequency polygon;
+        - `rfph`: relative frequency (%) histogram;
+        - `rfpp`: relative frequency (%) polygon;
+        - `d`: density;
+        - `cdh`: cumulative density histogram;
+        - `cdp`: cumulative density polygon;
+        - `cfh`: cumulative frequency histogram;
+        - `cfp`: cumulative frequency polygon;
+        - `cfph`: cumulative frequency (%) histogram;
+        - `cfph`: cumulative frequency (%) polygon.
 
         :param kwargs: forwarded to the various plot functions;
         :param type_: type of plot to generate.
