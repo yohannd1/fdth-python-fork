@@ -253,28 +253,34 @@ class NumericalFDT:
         """
 
         bins = self.binning.bins
+        mids = self._midpoints()
 
         if xlim is None:
             xlim = (self.binning.start, self.binning.end)
 
-        mids = self._midpoints()
+        def make_range_labels(ax, ylim_):
+            ybot, ytop = ylim_
+            yrange = ytop - ybot
+            yticks = np.arange(ybot, ybot + 1.1 * yrange, 0.1)
+            ylabels = [f"{k*100:.0f}%" for k in yticks]
+            ax.set_yticks(yticks, ylabels)
 
-        if type_ == "fh":
-            y = self.table["f"].to_numpy()
-
-            if ylim is None:
-                ylim = (0, y.max())
-
-            if ylab is None:
-                ylab = "Frequency"
-
+        def aux_barplot(
+            y,
+            percent=False,
+            default_ylab="Frequency",
+        ) -> None:
+            ylim_ = ylim or (0, y.max())
             fig, ax = plt.subplots()
             ax.set_xlim(xlim)
-            ax.set_ylim(ylim)
+            ax.set_ylim(ylim_)
             ax.set_title(main)
             ax.set_xlabel(xlab)
-            ax.set_ylabel(ylab)
+            ax.set_ylabel(ylab or default_ylab)
             ax.set_xticks(bins)
+
+            if percent:
+                make_range_labels(ax, ylim_)
 
             ax.bar(
                 x=mids,
@@ -287,6 +293,7 @@ class NumericalFDT:
             )
 
             if v:
+                # FIXME: this doesn't seem to work
                 plt.text(
                     mids,
                     y,
@@ -298,30 +305,81 @@ class NumericalFDT:
 
             if show:
                 plt.show()
+
+        def aux_polyplot(
+            y,
+            percent=False,
+            default_ylab="Frequency",
+        ) -> None:
+            ylim_ = ylim or (-0.1, y.max() + 0.1)
+            fig, ax = plt.subplots()
+            ax.set_xlim(xlim)
+            ax.set_ylim(ylim_)
+            ax.set_title(main)
+            ax.set_xlabel(xlab)
+            ax.set_ylabel(ylab or default_ylab)
+            ax.set_xticks(bins)
+
+            if percent:
+                make_range_labels(ax, ylim_)
+
+            ax.plot(mids, y, "o-", color=color, **kwargs)
+
+            if v:
+                # FIXME: this doesn't seem to work
+                plt.text(
+                    mids,
+                    y,
+                    [f"{val:.{v_round}f}" for val in y],
+                    va="bottom",
+                    ha="center",
+                    **kwargs,
+                )
+
+            if show:
+                plt.show()
+
+        if type_ == "fh":
+            y = self.table["f"].to_numpy()
+            aux_barplot(y)
         elif type_ == "fp":
-            raise NotImplementedError("TODO")
+            y = self.table["f"].to_numpy()
+            aux_polyplot(y)
         elif type_ == "rfh":
-            raise NotImplementedError("TODO")
+            y = self.table["rf"].to_numpy()
+            aux_barplot(y)
         elif type_ == "rfp":
-            raise NotImplementedError("TODO")
+            y = self.table["rf"].to_numpy()
+            aux_polyplot(y)
         elif type_ == "rfph":
-            raise NotImplementedError("TODO")
+            y = self.table["rf"].to_numpy()
+            aux_barplot(y, percent=True)
         elif type_ == "rfpp":
-            raise NotImplementedError("TODO")
+            y = self.table["rf"].to_numpy()
+            aux_polyplot(y, percent=True)
         elif type_ == "d":
-            raise NotImplementedError("TODO")
+            y = self.table["rf"].to_numpy() / self.binning.h
+            aux_barplot(y, default_ylab="Density")
         elif type_ == "cdh":
-            raise NotImplementedError("TODO")
+            y = self.table["cf"].to_numpy() / (self.count * self.binning.h)
+            aux_barplot(y, default_ylab="Cumulative density")
         elif type_ == "cdp":
-            raise NotImplementedError("TODO")
+            y = self.table["cf"].to_numpy() / (self.count * self.binning.h)
+            aux_polyplot(y, default_ylab="Cumulative density")
         elif type_ == "cfh":
-            raise NotImplementedError("TODO")
+            y = self.table["cf"].to_numpy()
+            aux_barplot(y)
         elif type_ == "cfp":
-            raise NotImplementedError("TODO")
+            y = self.table["cf"].to_numpy()
+            aux_polyplot(y)
         elif type_ == "cfph":
-            raise NotImplementedError("TODO")
+            y = self.table["cf"].to_numpy() / self.count
+            aux_barplot(y, percent=True)
         elif type_ == "cfpp":
-            raise NotImplementedError("TODO")
+            y = self.table["cf"].to_numpy() / self.count
+            aux_polyplot(y, percent=True)
+        else:
+            raise ValueError(f"unknown plot type {repr(type_)}")
 
     def to_string(
         self,

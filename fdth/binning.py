@@ -79,6 +79,7 @@ class Binning:
 
     @staticmethod
     def from_sturges(data: pd.Series) -> Binning:
+        # FIXME: doesn't seem to be accurate anymore?
         n = len(data)
         k = int(np.ceil(1 + 3.322 * np.log10(n)))
         return Binning.linspace(data=data, k=k)
