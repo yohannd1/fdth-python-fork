@@ -2,12 +2,31 @@
 
 A python port of the [fdth](https://github.com/jcfaria/fdth) R library.
 
-Feito como projeto da disciplina "Probabilidade e Estatística" (Ciência
-da Computação, UESC).
-
 ## examples
 
 Examples can be found at the `examples/python` folder.
+
+## (portuguese) o que falta a fazer
+
+Este pacote foi desenvolvido como projeto para a disciplina
+"Probabilidade e Estatística" (Ciência da Computação, UESC), no semestre
+2025.1.
+
+O projeto já está quase pronto, mas tem alguns problemas que ainda
+precisam ser consertados. Caso seja desejado, alguém pode pegar isso
+como projeto de novo - aqui um sumário:
+
+- a representação visual dos plots numéricos não está perfeita;
+
+- o funcionamento da classe MultipleFDT não está correspondente ao R
+(foi erro da gente ao transcrever o código antigo - usar o [código do
+semestre anterior](https://github.com/yuriccosta/fdth-python) pode
+ajudar a entender direito como deveria ser);
+
+  - em especial, levar em conta o argumento `by` que não foi levado em
+  conta;
+
+- passar resto da documentação (e comentários) para inglês;
 
 ## development
 
