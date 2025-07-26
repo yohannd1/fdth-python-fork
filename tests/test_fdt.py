@@ -42,8 +42,14 @@ class Test(unittest.TestCase):
             "B": [10, 20, 30],
         }) # fmt: skip
         fd = fdt(df)
+
+        # expected types for each column
         assert isinstance(fd.get_fdt("A"), CategoricalFDT)
         assert isinstance(fd.get_fdt("B"), NumericalFDT)
+
+        # different ways to get the same FDT
+        assert fd.get_fdt("A") is fd.get_fdt(index=0)
+        assert fd.get_fdt("B") is fd.get_fdt(index=1)
 
     def test_ndarray_fdt(self):
         x = np.array([
@@ -58,3 +64,12 @@ class Test(unittest.TestCase):
         assert isinstance(fd.get_fdt(0), CategoricalFDT)
         assert isinstance(fd.get_fdt(1), CategoricalFDT)
         assert isinstance(fd.get_fdt(2), CategoricalFDT)
+
+    def test_dataframe_fdt_mixed(self):
+        df = pd.DataFrame({
+            "foo": ["bar", "baz", "abc", "jj", "Bin"],
+            "bar": [1, 5, 3, 8, 10],
+        })
+        fd = fdt(df, sort=False)
+        assert isinstance(fd.get_fdt("foo"), CategoricalFDT)
+        assert isinstance(fd.get_fdt("bar"), NumericalFDT)

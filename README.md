@@ -28,6 +28,9 @@ ajudar a entender direito como deveria ser);
 
 - passar resto da documentação (e comentários) para inglês;
 
+- houve uma regressão em `Binning.from_sturges`, e o resultado difere do
+original;
+
 ## development
 
 First of all, clone the repository (para um tutorial em português

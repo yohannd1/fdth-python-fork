@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Iterable, Any
 
 import pandas as pd
 import numpy as np
@@ -63,11 +63,19 @@ class MultipleFDT:
         return self.get_fdt(column, index).get_table()
 
     @staticmethod
+    def _drop_keys(d: dict[Any, Any], keys: Iterable[Any]) -> None:
+        for k in keys:
+            if k in d:
+                del d[k]
+
+    @staticmethod
     def _auto_fdt(data: pd.Series, **kwargs) -> NumericalFDT | CategoricalFDT:
         kind = deduce_fdt_kind(data)
         if kind == "categorical":
+            MultipleFDT._drop_keys(kwargs, ("binning", "start", "end", "h", "k"))
             return CategoricalFDT(data, **kwargs)
         elif kind == "numerical":
+            MultipleFDT._drop_keys(kwargs, ("sort", "decreasing"))
             return NumericalFDT(data, **kwargs)
         else:
             raise TypeError(f"unexpected kind: {repr(kind)}")

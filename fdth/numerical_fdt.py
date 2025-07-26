@@ -405,7 +405,7 @@ class NumericalFDT:
         return table.to_string(index=row_numbers, justify="right" if right else "left")
 
     def __repr__(self) -> str:
-        res = f"NumericalFDT ({self.count} elements, {self.binning.k} classes, amplitude of {self.binning.h:.2f}):\n"
+        res = f"NumericalFDT ({self.count} elements, {self.binning.k} classes, class amplitude of {self.binning.h:.2f}):\n"
         res += self.to_string()
         return res
 

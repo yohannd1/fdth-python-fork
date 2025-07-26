@@ -10,7 +10,11 @@ from numpy.typing import NDArray
 
 @dataclass(frozen=True)
 class Binning:
-    """Class for storing information about binning for numerical FDTs."""
+    """
+    Class for storing information about binning for numerical FDTs.
+
+    Usually the desired result is to have a set of values following `h = (start - end) / k`, such that there are `k` class intervals and the start of the i-th class interval is at `start + h * (i - 1)`.
+    """
 
     start: float
     """The start of the bin."""
@@ -19,13 +23,13 @@ class Binning:
     """The end of the bin."""
 
     h: float
-    """The width/size of each bin."""
+    """The amplitude/width of each bin/class."""
 
     k: int
-    """The total amount of bins."""
+    """The total amount of bins/classes."""
 
     bins: NDArray
-    """An array with the start of each bin."""
+    """An array with the start of each bin. Usually generated automatically."""
 
     @staticmethod
     def auto(
@@ -34,6 +38,8 @@ class Binning:
         h: Optional[float] = None,
         k: Optional[int] = None,
     ) -> Callable[[pd.Series], Binning]:
+        """Build an automatic binning based on the passed start, end, h and k values."""
+
         all_none = lambda *x: all(xi is None for xi in x)
         no_none = lambda *x: all(xi is not None for xi in x)
 
@@ -79,13 +85,15 @@ class Binning:
 
     @staticmethod
     def from_sturges(data: pd.Series) -> Binning:
-        # FIXME: doesn't seem to be accurate anymore?
+        """Sturges method for calculating the binning."""
+        # FIXME: doesn't seem to be accurate anymore? do more testing here.
         n = len(data)
         k = int(np.ceil(1 + 3.322 * np.log10(n)))
         return Binning.linspace(data=data, k=k)
 
     @staticmethod
     def from_scott(data: pd.Series) -> Binning:
+        """Scott method for calculating the binning."""
         n = len(data)
         sd = np.std(data)
         at = data.max() - data.min()
@@ -94,6 +102,7 @@ class Binning:
 
     @staticmethod
     def from_fd(data: pd.Series) -> Binning:
+        """Freedman-Diaconis method for calculating the binning."""
         n = len(data)
         iqr = np.percentile(data, 75) - np.percentile(data, 25)
         k = int(np.ceil((data.max() - data.min()) / (2 * iqr / (n ** (1 / 3)))))
