@@ -44,3 +44,9 @@ class Test(unittest.TestCase):
         freqs = [5, 2, 1, 3]
         fd = fdt(freqs=pd.Series(freqs), binning=Binning.linspace(start=1, end=10, k=4))
         fd = NumericalFDT(freqs=freqs, binning=Binning.linspace(start=1, end=10, k=4))
+
+    def shorthand_notation(self):
+        data = [1, 5, 3, 8, 10]
+        fd1 = fdt(data, start=1, end=10, k=3)
+        fd2 = fdt(data, binning=Binning.auto(start=1, end=10, k=3))
+        self.assertEqual(fd1.to_string(), fd2.to_string())

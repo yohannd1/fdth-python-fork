@@ -39,7 +39,11 @@ class NumericalFDT:
         data: Optional[pd.Series[float] | Sequence[float]] = None,
         *,
         freqs: Optional[pd.Series[float] | Sequence[float]] = None,
-        binning: Binning | BinFunc = Binning.from_sturges,
+        binning: Optional[Binning | BinFunc] = None,
+        start: Optional[float] = None,
+        end: Optional[float] = None,
+        h: Optional[float] = None,
+        k: Optional[int] = None,
         right: bool = False,
         remove_nan: bool = False,
         round_: int = 2,
@@ -48,11 +52,25 @@ class NumericalFDT:
         :param data: the data array;
         :param freqs: the frequency array - an alternative to the data array;
         :param binning: the binning, or a function that generates the binning based on the data;
+        :param start: shorthand for `start` arg of Binning.auto
+        :param end: shorthand for `end` arg of Binning.auto
+        :param h: shorthand for `h` arg of Binning.auto
+        :param k: shorthand for `k` arg of Binning.auto
         :param right: whether to include the right endpoint in each interval;
+        :param remove_nan: whether to remove NaN / None values in the dataset - if false, will error on encountering one;
         :param round_: the rounding level for the numbers in the table;
 
         :return a frequency distribution table with class limits, frequencies, relative frequencies, cumulative frequencies, and cumulative percentages.
         """
+
+        if (start is not None) or (end is not None) or (h is not None) or (k is not None):
+            if binning is not None:
+                raise ValueError("cannot specify `binning` and one of `start`/`end`/`h`/`k` at the same time")
+            else:
+                binning = Binning.auto(start=start, end=end, h=h, k=k)
+        else:
+            if binning is None:
+                binning = Binning.from_sturges
 
         if data is not None and freqs is not None:
             raise ValueError("exactly one of `data` or `freqs` must be specified")
@@ -275,7 +293,8 @@ class NumericalFDT:
             fig, ax = plt.subplots()
             ax.set_xlim(xlim)
             ax.set_ylim(ylim_)
-            ax.set_title(main)
+            if main is not None:
+                ax.set_title(main)
             ax.set_xlabel(xlab)
             ax.set_ylabel(ylab or default_ylab)
             ax.set_xticks(bins)
@@ -316,7 +335,8 @@ class NumericalFDT:
             fig, ax = plt.subplots()
             ax.set_xlim(xlim)
             ax.set_ylim(ylim_)
-            ax.set_title(main)
+            if main is not None:
+                ax.set_title(main)
             ax.set_xlabel(xlab)
             ax.set_ylabel(ylab or default_ylab)
             ax.set_xticks(bins)
