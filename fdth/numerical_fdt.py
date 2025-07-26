@@ -402,6 +402,10 @@ class NumericalFDT:
         else:
             raise ValueError(f"unknown plot type {repr(type_)}")
 
+    def print(self, **kwargs) -> None:
+        """Shorthand for `self.print(self.to_string(**kwargs))."""
+        print(self.to_string(**kwargs))
+
     def to_string(
         self,
         columns: list[str] | None = None,
