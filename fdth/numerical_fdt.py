@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional, Sequence, Any, Callable, cast
+from typing import Optional, Sequence, Any, Callable, cast, Iterable, Sequence
 from functools import lru_cache
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.typing import NDArray
 
 from .binning import Binning
 
@@ -108,54 +109,54 @@ class NumericalFDT:
         h = self.binning.h
         return self.binning.end - self.binning.start
 
-    @staticmethod
-    def fmt_percentile(x: float) -> str:
-        return f"{x * 100:.2f}%"
-
-    def quantiles(
+    def quantile(
         self,
-        bins: Sequence[float] | Any = np.arange(0.0, 1.0, 0.1),
-        fmt_fn: Callable[[float], str] | None = None,
-    ) -> pd.Series:
+        pos: int | float | Iterable[int | float] | NDArray,
+        by: int | float | Sequence[float] | NDArray = 1.0,
+    ) -> float | list[float]:
         """
-        Calculate an approximate of multiple quantiles of the data represented by the FDT.
+        Calculate approximates of one or more quantiles of the data represented by the FDT.
 
-        :param bins: array of values between 0 and 1
-        :param fmt_fn: function that maps the quantile number to a representation in the result. Defaults to percentile formatting.
+        :param pos: position(s) of the quantile(s) - if `by` is a set of data, it should be int.
+        :param by: the divisor for the quantile, or an array of possible quantile positions (with each value in [0, 1]).
         """
-        fmt_fn = fmt_fn if fmt_fn is not None else self.fmt_percentile
-        return pd.Series({fmt_fn(b): self.quantile(b) for b in bins})
 
-    def quantile(self, pos: float) -> float:
-        """
-        Calculate an approximate of a quantile of the data represented by the FDT.
+        def single_quantile(a, b) -> float:
+            if a < 0.0:
+                raise ValueError(f"quantile position should be positive - got {a}")
+            if a > b:
+                raise ValueError(f"quantile position is too big - should be smaller than `by` ({a} > {b})")
 
-        :param pos: position of the quantile - must be between 0 and 1.
-        """
-        if not (0.0 <= pos <= 1.0):
-            raise ValueError(
-                f"quantile position {pos} out of range - must be in [0, 1]"
-            )
+            # calculate "position" where the desired class will be
+            pos_count = self.count * (a / b)
 
-        # calculate "position" where the desired class will be
-        pos_count = self.count * pos
+            # get quantile index
+            idx = np.where(pos_count <= self.table["cf"])[0][0]
 
-        # get quantile index
-        idx = np.where(pos_count <= self.table["cf"])[0][0]
+            bins = self.binning.bins
+            h = self.binning.h
 
-        bins = self.binning.bins
-        h = self.binning.h
+            # quantile class lower limit
+            ll = bins[idx]
 
-        # quantile class lower limit
-        ll = bins[idx]
+            # cumulative frequency of the previous class
+            cf_prev = 0 if idx < 1 else self.table.iloc[idx - 1, 4]
 
-        # cumulative frequency of the previous class
-        cf_prev = 0 if idx < 1 else self.table.iloc[idx - 1, 4]
+            # frequency of the quantile class
+            f_q = self.table.iloc[idx, 1]
 
-        # frequency of the quantile class
-        f_q = self.table.iloc[idx, 1]
+            return ll + ((pos_count - cf_prev) * h) / f_q
 
-        return ll + ((pos_count - cf_prev) * h) / f_q
+        if isinstance(by, int | float):
+            if isinstance(pos, int | float):
+                return single_quantile(pos, by)
+            else:
+                return [single_quantile(x, by) for x in pos]
+        else:
+            if isinstance(pos, int):
+                return single_quantile(by[pos], 1)
+            else:
+                return [single_quantile(by[i], 1) for i in pos]
 
     @lru_cache
     def median(self) -> float:
@@ -294,7 +295,14 @@ class NumericalFDT:
 
             if v:
                 for xpos, ypos in zip(mids, y):
-                    ax.text(xpos, ypos, f"{ypos:.{v_round}f}", va="bottom", ha="center", **kwargs)
+                    ax.text(
+                        xpos,
+                        ypos,
+                        f"{ypos:.{v_round}f}",
+                        va="bottom",
+                        ha="center",
+                        **kwargs,
+                    )
 
             if show:
                 plt.show()
@@ -320,7 +328,14 @@ class NumericalFDT:
 
             if v:
                 for xpos, ypos in zip(mids, y):
-                    ax.text(xpos, ypos, f"{ypos:.{v_round}f}", va="bottom", ha="center", **kwargs)
+                    ax.text(
+                        xpos,
+                        ypos,
+                        f"{ypos:.{v_round}f}",
+                        va="bottom",
+                        ha="center",
+                        **kwargs,
+                    )
 
             if show:
                 plt.show()

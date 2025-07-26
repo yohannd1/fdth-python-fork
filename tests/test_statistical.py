@@ -36,8 +36,22 @@ class Test(unittest.TestCase):
     def test_quantiles(self):
         data = np.array([1, 5, 3, 2, 1, 8])
         fd = fdt(data)
-        self.assertEqual(fd.median(), fd.quantile(0.5))
-        self.assertEqual(fd.median(), fd.quantiles([0.5]).iloc[0])
+
+        # using the median as a reference point here.
+        median = fd.median()
+
+        # basic usage - 0 <= `pos` <= 1, `by` unspecified
+        self.assertEqual(median, fd.quantile(0.5))
+
+        # 5th decile
+        self.assertEqual(median, fd.quantile(5, by=10))
+
+        # 50th percentile
+        self.assertEqual(median, fd.quantile(50, by=100))
+
+        # second quartile, using the index `2` on the specified binning.
+        # equivalent to fd.quantile(np.arange(0, 1, 0.25)[2])
+        self.assertEqual(median, fd.quantile(2, by=np.arange(0, 1, 0.25)))
 
     def test_mfv(self):
         def mfv_and_compare(data, expected_mfv) -> None:
